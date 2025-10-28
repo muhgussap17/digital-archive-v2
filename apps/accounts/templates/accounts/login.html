@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login - Sistem Arsip Digital</title>
+    
+    <!-- Favicon -->
+    <link href="{% static 'argon/img/brand/favicon.png' %}" rel="icon" type="image/png">
+    
+    <!-- Fonts -->
+    <link href="{% static 'fonts/plus-jakarta-sans.css' %}" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="{% static 'vendor/fontawesome-7/css/all.min.css' %}" rel="stylesheet">
+    
+    <!-- Argon CSS -->
+    <link href="{% static 'argon/css/argon.min.css' %}" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .main-content {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+
+<body class="bg-default">
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header bg-default py-7 py-lg-8 pt-lg-9">
+            <div class="container">
+                <div class="header-body text-center mb-7">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-5 col-lg-6 col-md-8 px-5">
+                            <h1 class="text-white">Sistem Arsip Digital</h1>
+                            <p class="text-lead text-white">
+                                Sistem Manajemen Dokumen PDF untuk Instansi Pemerintah
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="separator separator-bottom separator-skew zindex-100">
+                <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <polygon class="fill-default" points="2560 0 2560 100 0 100"></polygon>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Page content -->
+        <div class="container mt--8 pb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7">
+                    <div class="card bg-secondary border-0 mb-0">
+                        <div class="card-header bg-transparent pb-5">
+                            <div class="text-muted text-center mt-2 mb-3">
+                                <small>Masuk dengan kredensial Anda</small>
+                            </div>
+                        </div>
+                        <div class="card-body px-lg-5 py-lg-5">
+                            {% if messages %}
+                                {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    <span class="alert-icon"><i class="fa-solid fa-{{ message.tags == 'error' and 'triangle-exclamation' or 'circle-check' }}"></i></span>
+                                    <span class="alert-text">{{ message }}</span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <form method="post" action="{% url 'accounts:login' %}">
+                                {% csrf_token %}
+                                <div class="form-group mb-3">
+                                    <div class="input-group input-group-merge input-group-alternative">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-user"></i>
+                                            </span>
+                                        </div>
+                                        <!-- Username -->
+                                        <input class="form-control" placeholder="Username" type="text" name="username"requiredautofocus>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group input-group-merge input-group-alternative">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-lock"></i>
+                                            </span>
+                                        </div>
+                                        <!-- Password -->
+                                        <input class="form-control" placeholder="Password" type="password" name="password"required>
+                                    </div>
+                                </div>
+                                <div class="custom-control custom-control-alternative custom-checkbox">
+                                    <input class="custom-control-input" id="rememberMe" type="checkbox"name="remember">
+                                    <label class="custom-control-label" for="rememberMe">
+                                        <span class="text-muted">Ingat saya</span>
+                                    </label>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-default my-4">
+                                        <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            <small class="text-muted">
+                                © {% now "Y" %} Sistem Arsip Digital
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Core JS -->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <!-- Argon JS -->
+    <script src="{% static 'argon/js/argon.min.js' %}"></script>
+</body>
+</html>

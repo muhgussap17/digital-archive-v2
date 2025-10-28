@@ -1,0 +1,72 @@
+[
+  {
+    "model": "archive.documentcategory",
+    "pk": 1,
+    "fields": {
+      "name": "SPD",
+      "slug": "spd",
+      "parent": null,
+      "icon": "fa-plane"
+    }
+  },
+  {
+    "model": "archive.documentcategory",
+    "pk": 2,
+    "fields": {
+      "name": "Belanjaan",
+      "slug": "belanjaan",
+      "parent": null,
+      "icon": "fa-shopping-cart"
+    }
+  },
+  {
+    "model": "archive.documentcategory",
+    "pk": 3,
+    "fields": {
+      "name": "ATK",
+      "slug": "atk",
+      "parent": 2,
+      "icon": "fa-pen"
+    }
+  },
+  {
+    "model": "archive.documentcategory",
+    "pk": 4,
+    "fields": {
+      "name": "Konsumsi",
+      "slug": "konsumsi",
+      "parent": 2,
+      "icon": "fa-utensils"
+    }
+  },
+  {
+    "model": "archive.documentcategory",
+    "pk": 5,
+    "fields": {
+      "name": "BBM",
+      "slug": "bbm",
+      "parent": 2,
+      "icon": "fa-gas-pump"
+    }
+  },
+  {
+    "model": "archive.documentcategory",
+    "pk": 6,
+    "fields": {
+      "name": "Surat Kabar",
+      "slug": "surat-kabar",
+      "parent": 2,
+      "icon": "fa-newspaper"
+    }
+  },
+  {
+    "model": "archive.documentcategory",
+    "pk": 7,
+    "fields": {
+      "name": "Karangan Bunga",
+      "slug": "karangan-bunga",
+      "parent": 2,
+      "icon": "fa-leaf"
+    }
+  }
+]

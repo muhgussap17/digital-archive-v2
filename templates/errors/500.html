@@ -1,0 +1,46 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>500 - Server Error</title>
+    
+    <link href="{% static 'vendor/fontawesome/css/fontawesome.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/solid.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/argon.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(87deg, #172b4d 0, #1a3a5f 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <div class="display-1 text-white mb-4">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h1 class="display-2 text-white font-weight-bold">500</h1>
+                    <h2 class="text-white mb-4">Server Error</h2>
+                    <p class="lead text-white mb-5">
+                        Maaf, terjadi kesalahan pada server. 
+                        Tim kami sedang bekerja untuk memperbaikinya.
+                    </p>
+                    <a href="{% url 'archive:dashboard' %}" class="btn btn-white btn-lg">
+                        <i class="fa-solid fa-house"></i> Kembali ke Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

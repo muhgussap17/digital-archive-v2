@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load date_filters %}
+{% load custom_tags %}
+
+{% block title %}Dashboard - Sistem Arsip Digital{% endblock %}
+
+{% block extra_css %}
+<!-- Select2 -->
+<link href="{% static 'vendor/select2/dist/css/select2.min.css' %}" rel="stylesheet">    
+<!-- DataTables Bootstrap 4 -->
+<!-- <link rel="stylesheet" href="{% static 'vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}"> -->
+{% endblock %}
+    
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
+{% block header_stats %}
+<div class="row">
+    <div class="col-xl-4 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Total Dokumen</h5>
+                        <span class="h2 font-weight-bold mb-0">{{ total_documents }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-default text-white rounded-circle shadow">
+                            <i class="fa-solid fa-folder"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <a href="{% url 'archive:document_list' %}" class="text-nowrap text-default">Lihat semua</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Dokumen SPD</h5>
+                        <span class="h2 font-weight-bold mb-0">{{ total_spd }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                            <i class="fa-solid fa-plane"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <a href="{% url 'archive:category_documents' 'spd' %}" class="text-nowrap text-warning">Lihat SPD</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Belanjaan</h5>
+                        <span class="h2 font-weight-bold mb-0">{{ total_belanjaan }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <a href="{% url 'archive:category_documents' 'belanjaan' %}" class="text-nowrap text-success">Lihat belanjaan</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Recent Documents - Datatables (belum berfungsi) -->
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Dokumen Terbaru</h3>
+                    </div>
+                    <div class="col text-right">
+                        <a href="{% url 'archive:document_list' %}" class="btn btn-sm btn-default">Lihat Semua</a>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive py-3">
+                <table class="table table-flush align-items-center" id="datatables-basic">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Dokumen</th>
+                            <th>Kategori</th>
+                            <th>Tanggal</th>
+                            <th>Diupload Oleh</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in recent_documents %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="icon icon-shape bg-default text-white rounded-circle shadow mr-3">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ document.get_display_name }}</h6>
+                                        <small class="text-muted">{{ document.file.name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if document.category.slug == 'spd' %}
+                                <span class="badge badge-dot mr-4">
+                                    <i class="bg-warning"></i>
+                                    <span class="status">{{ document.category.name }}</span>
+                                </span>
+                                {% else %}
+                                <span class="badge badge-dot mr-4">
+                                    <i class="bg-success"></i>
+                                    <span class="status">{{ document.category.name }}</span>
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ document.document_date|indo_date }}</td>
+                            <td>{{ document.created_by.full_name }}</td>
+                            <td class="text-right">
+                                <a href="{% url 'archive:document_detail' document.id %}" class="btn btn-sm btn-icon btn-default">
+                                    <span class="btn-inner--icon"><i class="fa-solid fa-eye"></i></span>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <p class="text-muted mb-0">Belum ada dokumen</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities - Timeline -->
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="mb-0">Aktivitas Terbaru</h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                {% if activity.action_type == 'create' %}
+                                <span class="avatar avatar-sm rounded-circle bg-success">
+                                    <i class="fa-solid fa-plus"></i>
+                                </span>
+                                {% elif activity.action_type == 'delete' %}
+                                <span class="avatar avatar-sm rounded-circle bg-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </span>
+                                {% elif activity.action_type == 'download' %}
+                                <span class="avatar avatar-sm rounded-circle bg-warning">
+                                    <i class="fa-solid fa-download"></i>
+                                </span>
+                                {% elif activity.action_type == 'view' %}
+                                <span class="avatar avatar-sm rounded-circle bg-info">
+                                    <i class="fa-solid fa-eye"></i>
+                                </span>
+                                {% else %}
+                                <span class="avatar avatar-sm rounded-circle bg-info">
+                                    <i class="fa-solid fa-pen"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="col ml--2">
+                                <h4 class="mb-0 text-sm">
+                                    {{ activity.get_action_type_display }}
+                                </h4>
+                                <p class="text-xs text-muted mb-0">
+                                    {{ activity.document.get_display_name|truncate_chars:40 }}
+                                </p>
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-user"></i> {{ activity.user.full_name }} • 
+                                    <i class="fa-solid fa-clock"></i> {{ activity.created_at|time_since }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-center py-4">
+                        <p class="text-muted mb-0">Belum ada aktivitas</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Statistics by Category - Charts -->
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="mb-0">Statistik per Kategori</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" class="chart-canvas" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="mb-0">Rincian Kategori</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-items-center table-flush">
+                    <tbody>
+                        {% for stat in category_stats %}
+                        <tr>
+                            <td>
+                                <i class="fa-solid {{ stat.icon }} text-default mr-2"></i>
+                                {{ stat.name }}
+                            </td>
+                            <td class="text-right">
+                                <span class="badge badge-default">{{ stat.doc_count }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center py-3">
+                                <p class="text-muted mb-0">Tidak ada data</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Select2 -->
+<script src="{% static 'vendor/select2/dist/js/select2.min.js' %}"></script>
+
+<script>
+// Category Chart - Saran ganti menggunakan Pie Chart
+var ctx = document.getElementById('categoryChart');
+if (ctx) {
+    var categoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for stat in category_stats %}'{{ stat.name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Jumlah Dokumen',
+                data: [{% for stat in category_stats %}{{ stat.doc_count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                backgroundColor: 'rgba(94, 114, 228, 0.8)',
+                borderColor: 'rgba(94, 114, 228, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

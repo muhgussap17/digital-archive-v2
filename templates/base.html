@@ -1,0 +1,214 @@
+{% load static %}
+{% load custom_tags %}
+{% load date_filters %}
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}Sistem Arsip Digital{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link href="{% static 'argon/img/brand/favicon.png' %}" rel="icon" type="image/png">
+    
+    <!-- Icons - FontAwesome 7 -->
+    <link href="{% static 'vendor/fontawesome/css/fontawesome.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/solid.min.css' %}" rel="stylesheet">
+    
+    <!-- Argon CSS -->
+    <link href="{% static 'css/argon.min.css' %}" rel="stylesheet">
+    
+    <!-- DataTables Bootstrap 4 -->
+    <link href="{% static 'vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+
+    <!-- Select2 -->
+    <link href="{% static 'vendor/select2/dist/css/select2.min.css' %}" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link href="{% static 'vendor/animate.css/animate.min.css' %}" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Sidebar -->
+    {% include 'partials/sidebar.html' %}
+
+    <!-- Main content -->
+    <div class="main-content" id="panel">
+        
+        <!-- Topnav -->
+        {% include 'partials/navbar.html' %}
+        
+        <!-- Header -->
+        {% block header %}
+        <div class="header bg-default pb-6">
+            <div class="container-fluid">
+                <div class="header-body">
+                    <div class="row align-items-center py-4">
+                        <div class="col-lg-6 col-7">
+                            <h6 class="h2 text-white d-inline-block mb-0">{% block page_title %}Dashboard{% endblock %}</h6>
+                            <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                                <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                                    <li class="breadcrumb-item"><a href="{% url 'archive:dashboard' %}"><i class="fa-solid fa-house"></i></a></li>
+                                    {% block breadcrumb %}{% endblock %}
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="col-lg-6 col-5 text-right">
+                            {% block header_actions %}{% endblock %}
+                        </div>
+                    </div>
+                    {% block header_stats %}{% endblock %}
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+        
+        <!-- Page content -->
+        <div class="container-fluid mt--6">
+            
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+                    <span class="alert-icon"><i class="fa-solid fa-circle-info"></i></span>
+                    <span class="alert-text">{{ message }}</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="row ">
+                <!-- Main Content -->
+                <div class="col-12" id="mainContent">
+                    {% block content %}{% endblock %}
+                </div>
+                
+                <!-- Right Detail Panel (collapsed by default) -->
+                <div class="col-xl-4 col-lg-5" id="detailPanel" style="display: none;">
+                    {% block detail_panel %}{% endblock %}
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            {% include 'partials/footer.html' %}
+        </div>
+    </div>
+    
+    <!-- Core JS -->
+    <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/js-cookie/js.cookie.js' %}"></script>
+    <script src="{% static 'vendor/jquery.scrollbar/jquery.scrollbar.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js' %}"></script>
+
+    <!-- Argon JS -->
+    <script src="{% static 'js/argon.js' %}"></script>
+    
+    <!-- Chart.js -->
+    <script src="{% static 'vendor/chart.js/dist/Chart.min.js' %}"></script>
+    <script src="{% static 'vendor/chart.js/dist/Chart.extension.js' %}"></script>
+    
+    <!-- DataTables -->
+    <script src="{% static 'vendor/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+    
+    <!-- Select2 -->
+    <script src="{% static 'vendor/select2/dist/js/select2.min.js' %}"></script>
+    
+    <!-- Bootstrap Datepicker -->
+    <script src="{% static 'vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+    
+    <!-- Bootstrap Notify -->
+    <script src="{% static 'vendor/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/custom.js' %}"></script>
+    
+    <script>
+        // CSRF token untuk AJAX
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        // Setup AJAX dengan CSRF token
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        // Inisialisasi datepicker
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+            language: 'id',
+            autoclose: true,
+            todayHighlight: true,
+            todayBtn: 'linked',
+            orientation: 'bottom auto'
+        });
+        
+        // Auto-hide alerts
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+        
+        // Toggle field destination_other (untuk upload SPD dengan tujuan "Lainnya")
+        function toggleDestinationOther(select) {
+            var otherGroup = $(select).closest('form').find('#destination_other_group');
+            var otherField = $(select).closest('form').find('[name="destination_other"]');
+            
+            if (select.value === 'other') {
+                otherGroup.show();
+                otherField.prop('required', true);
+            } else {
+                otherGroup.hide();
+                otherField.prop('required', false);
+                otherField.val('');
+            }
+        }
+        
+        // Menampilkan notifikasi menggunakan Bootstrap Notify
+        function showNotification(type, message, title) {
+            $.notify({
+                icon: 'fa-solid fa-bell',
+                title: title || '',
+                message: message
+            }, {
+                type: type, // success, info, warning, danger
+                placement: {
+                    from: 'top',
+                    align: 'right'
+                },
+                delay: 4000,
+                animate: {
+                    enter: 'animate__animated animate__fadeInDown',
+                    exit: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,173 @@
+{% load date_filters %}
+{% load custom_tags %}
+
+<!-- Detail Panel Content (loaded via AJAX) -->
+<div class="detail-panel-header">
+    <button type="button" class="detail-panel-close" onclick="hideDetailPanel()">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+    <h5 class="mb-0">Detail Dokumen</h5>
+</div>
+
+<!-- Tabs -->
+<div class="px-3 pt-3">
+    <ul class="nav nav-tabs" id="detailTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="detail-tab" data-toggle="tab" href="#detailContent" role="tab">
+                <i class="fa-solid fa-circle-info"></i> Detail
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="activity-tab" data-toggle="tab" href="#activityContent" role="tab">
+                <i class="fa-solid fa-clock-rotate-left"></i> Aktivitas
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content detail-panel-body" id="detailTabContent">
+    <!-- Detail Tab -->
+    <div class="tab-pane fade show active" id="detailContent" role="tabpanel">
+        <!-- Document Preview -->
+        <div class="document-preview-thumb">
+            <div class="preview-icon">
+                <i class="fa-solid fa-file-pdf"></i>
+            </div>
+        </div>
+        
+        <!-- Document Title -->
+        <h6 class="mb-3 font-weight-bold" id="docTitle">{{ document.get_display_name }}</h6>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions mb-4">
+            <a href="{% url 'archive:document_preview' document.id %}" 
+               class="btn btn-sm btn-info" 
+               target="_blank">
+                <i class="fa-solid fa-eye"></i> Preview
+            </a>
+            <a href="{% url 'archive:document_download' document.id %}" 
+               class="btn btn-sm btn-success">
+                <i class="fa-solid fa-download"></i> Download
+            </a>
+        </div>
+        
+        <!-- Document Info -->
+        <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+            Informasi Dokumen
+        </h6>
+        
+        <ul class="detail-info-list">
+            <li>
+                <span class="info-label">Kategori</span>
+                <span class="info-value">
+                    {% if document.category.slug == 'spd' %}
+                    <span class="badge badge-warning">{{ document.category.name }}</span>
+                    {% else %}
+                    <span class="badge badge-success">{{ document.category.name }}</span>
+                    {% endif %}
+                </span>
+            </li>
+            <li>
+                <span class="info-label">Tanggal Dokumen</span>
+                <span class="info-value">{{ document.document_date|indo_date }}</span>
+            </li>
+            <li>
+                <span class="info-label">Nama File</span>
+                <span class="info-value">{{ document.file.name|split:'/'|last }}</span>
+            </li>
+            <li>
+                <span class="info-label">Ukuran</span>
+                <span class="info-value">{{ document.file_size|file_size }}</span>
+            </li>
+            <li>
+                <span class="info-label">Diupload Oleh</span>
+                <span class="info-value">{{ document.created_by.full_name }}</span>
+            </li>
+            <li>
+                <span class="info-label">Tanggal Upload</span>
+                <span class="info-value">
+                    {{ document.created_at|indo_date:'datetime' }}<br>
+                    <small class="text-muted">({{ document.created_at|time_since }})</small>
+                </span>
+            </li>
+        </ul>
+        
+        <!-- SPD Specific Info -->
+        {% if document.spd_info %}
+        <h6 class="text-uppercase text-muted mt-4 mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+            Informasi SPD
+        </h6>
+        
+        <ul class="detail-info-list">
+            <li>
+                <span class="info-label">Nama Pegawai</span>
+                <span class="info-value">
+                    {{ document.spd_info.employee.name }}<br>
+                    <small class="text-muted">NIP: {{ document.spd_info.employee.nip }}</small>
+                </span>
+            </li>
+            <li>
+                <span class="info-label">Tujuan</span>
+                <span class="info-value">{{ document.spd_info.get_destination_display_full }}</span>
+            </li>
+            <li>
+                <span class="info-label">Periode</span>
+                <span class="info-value">
+                    {{ document.spd_info.start_date|indo_date:'short' }} - 
+                    {{ document.spd_info.end_date|indo_date:'short' }}<br>
+                    <small class="text-muted">({{ document.spd_info.get_duration_days }} hari)</small>
+                </span>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+    
+    <!-- Activity Tab -->
+    <div class="tab-pane fade" id="activityContent" role="tabpanel">
+        <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+            Riwayat Aktivitas
+        </h6>
+        
+        <div class="activity-timeline">
+            {% for activity in activities %}
+            <div class="activity-item activity-{{ activity.action_type }}">
+                <div class="activity-time">
+                    <i class="fa-solid fa-clock"></i> {{ activity.created_at|time_since }}
+                </div>
+                <div class="activity-content">
+                    <span class="activity-user">{{ activity.user.full_name }}</span>
+                    {% if activity.action_type == 'create' %}
+                    <i class="fa-solid fa-plus text-success"></i> Membuat dokumen
+                    {% elif activity.action_type == 'view' %}
+                    <i class="fa-solid fa-eye text-info"></i> Melihat dokumen
+                    {% elif activity.action_type == 'download' %}
+                    <i class="fa-solid fa-download text-warning"></i> Mengunduh dokumen
+                    {% elif activity.action_type == 'update' %}
+                    <i class="fa-solid fa-pen text-default"></i> Memperbarui dokumen
+                    {% elif activity.action_type == 'delete' %}
+                    <i class="fa-solid fa-trash text-danger"></i> Menghapus dokumen
+                    {% endif %}
+                    
+                    {% if activity.description %}
+                    <div class="text-muted mt-1" style="font-size: 0.8125rem;">
+                        {{ activity.description }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if activity.ip_address %}
+                    <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                        <i class="fa-solid fa-location-dot"></i> {{ activity.ip_address }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-4">
+                <i class="fa-solid fa-clock-rotate-left fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Belum ada aktivitas</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load date_filters %}
+{% load custom_tags %}
+
+{% block title %}Profil Saya - Sistem Arsip Digital{% endblock %}
+
+{% block page_title %}Profil Saya{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Profil</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Profile Card -->
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Informasi Akun</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="avatar avatar-xl rounded-circle bg-default mb-3">
+                    <i class="fa-solid fa-user fa-2x"></i>
+                </div>
+                <h3 class="mb-0">{{ request.user.full_name }}</h3>
+                <p class="text-muted">{{ request.user.username }}</p>
+                
+                <hr class="my-4">
+                
+                <div class="text-left">
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted small">
+                            <i class="fa-solid fa-envelope mr-1"></i> Email
+                        </div>
+                        <div class="col-7 small">
+                            {{ request.user.email|default:"Belum diatur" }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted small">
+                            <i class="fa-solid fa-phone mr-1"></i> Telepon
+                        </div>
+                        <div class="col-7 small">
+                            {{ request.user.phone|default:"Belum diatur" }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted small">
+                            <i class="fa-solid fa-calendar-plus mr-1"></i> Bergabung
+                        </div>
+                        <div class="col-7 small">
+                            {{ request.user.date_joined|indo_date }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted small">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> Role
+                        </div>
+                        <div class="col-7">
+                            {% if request.user.is_superuser %}
+                            <span class="badge badge-danger">Superuser</span>
+                            {% elif request.user.is_staff %}
+                            <span class="badge badge-warning">Staff</span>
+                            {% else %}
+                            <span class="badge badge-info">User</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <a href="{% url 'accounts:profile_edit' %}" class="btn btn-sm btn-default btn-block">Edit Profil</a>
+                <a href="{% url 'accounts:password_change' %}" class="btn btn-sm btn-outline-default btn-block">Ubah Password</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics & Activity -->
+    <div class="col-xl-8">
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Total Upload</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ total_uploads }}</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                                    <i class="fa-solid fa-upload"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                            <span class="text-success mr-2">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </span>
+                            <span class="text-nowrap">Dokumen yang Anda upload</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Total Aktivitas</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ total_activities }}</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                            <span class="text-info mr-2">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </span>
+                            <span class="text-nowrap">Aktivitas yang dilakukan</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Uploads -->
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">
+                            <i class="fa-solid fa-file-arrow-up"></i> Upload Terbaru
+                        </h3>
+                    </div>
+                    <div class="col text-right">
+                        <a href="{% url 'archive:document_list' %}" class="btn btn-sm btn-default">
+                            Lihat Semua
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Dokumen</th>
+                            <th>Kategori</th>
+                            <th>Tanggal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in recent_uploads %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="icon icon-shape bg-default text-white rounded-circle shadow mr-3">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-sm">{{ document.get_display_name }}</h6>
+                                        <small class="text-muted">{{ document.file.name|split:'/'|last }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-dot mr-4">
+                                    <i class="bg-success"></i>
+                                    <span class="status">{{ document.category.name }}</span>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-sm">{{ document.created_at|time_since }}</span>
+                            </td>
+                            <td>
+                                <button type="button" 
+                                        class="btn btn-sm btn-icon btn-info"
+                                        onclick="showDetailPanel({{ document.id }})">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">
+                                <p class="text-muted mb-0">Belum ada upload</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Recent Activities -->
+        <div class="card mt-4">
+            <div class="card-header border-0">
+                <h3 class="mb-0">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Aktivitas Terbaru
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                {% if activity.action_type == 'create' %}
+                                <span class="avatar avatar-sm rounded-circle bg-success">
+                                    <i class="fa-solid fa-plus"></i>
+                                </span>
+                                {% elif activity.action_type == 'delete' %}
+                                <span class="avatar avatar-sm rounded-circle bg-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </span>
+                                {% elif activity.action_type == 'download' %}
+                                <span class="avatar avatar-sm rounded-circle bg-warning">
+                                    <i class="fa-solid fa-download"></i>
+                                </span>
+                                {% elif activity.action_type == 'view' %}
+                                <span class="avatar avatar-sm rounded-circle bg-info">
+                                    <i class="fa-solid fa-eye"></i>
+                                </span>
+                                {% else %}
+                                <span class="avatar avatar-sm rounded-circle bg-default">
+                                    <i class="fa-solid fa-pen"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="col ml--2">
+                                <h4 class="mb-0 text-sm">
+                                    {{ activity.get_action_type_display }}
+                                </h4>
+                                <p class="text-xs text-muted mb-0">
+                                    {{ activity.document.get_display_name|truncate_chars:50 }}
+                                </p>
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-clock"></i> {{ activity.created_at|time_since }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-center py-4">
+                        <p class="text-muted mb-0">Belum ada aktivitas</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block detail_panel %}
+{% include 'archive/components/detail_panel.html' %}
+{% endblock %}

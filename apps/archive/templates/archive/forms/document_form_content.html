@@ -1,0 +1,135 @@
+{% load static %}
+{% load custom_tags %}
+<!-- Form Content untuk Upload/Edit Dokumen Belanjaan -->
+
+{% if is_update %}
+    <!-- Info dokumen existing -->
+    <div class="alert alert-info mb-3">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong>Edit Mode:</strong> File tidak dapat diganti. Hanya metadata yang dapat diubah.
+    </div>
+{% endif %}
+
+<div class="row">
+    <!-- Kategori Dokumen -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.category.id_for_label }}">
+                {{ form.category.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.category }}
+            {% if form.category.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.category.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                Pilih kategori dokumen (ATK, Konsumsi, BBM, dll)
+            </small> -->
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Tanggal Dokumen -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.document_date.id_for_label }}">
+                {{ form.document_date.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.document_date }}
+            <!-- <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                </div>
+            </div> -->
+            {% if form.document_date.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.document_date.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                Tanggal yang tertera pada dokumen
+            </small> -->
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- File Upload -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.file.id_for_label }}">
+                {{ form.file.label }}
+                {% if not is_update %}<span class="text-danger">*</span>{% endif %}
+            </label>
+            
+            {% if is_update %}
+                <!-- Display existing file info -->
+                <div class="alert alert-light border mb-2">
+                    <i class="fa-solid fa-file-pdf text-danger"></i>
+                    <strong>File saat ini:</strong> {{ document.file.name|split:'/'|last }}
+                    <br>
+                    <small class="text-muted">
+                        Ukuran: {{ document.get_file_size_display }}
+                    </small>
+                </div>
+            {% endif %}
+            
+            <div class="custom-file">
+                {{ form.file }}
+                <label class="custom-file-label" for="{{ form.file.id_for_label }}">
+                    {% if is_update %}File tidak dapat diganti{% else %}Pilih file PDF...{% endif %}
+                </label>
+            </div>
+            
+            {% if form.file.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.file.errors.0 }}
+                </div>
+            {% endif %}
+            
+            {% if form.file.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.file.help_text }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Non-field errors (if any) -->
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+
+<script>
+// Script untuk update label custom file input
+$(document).ready(function() {
+    // Custom file input label update
+    $('.custom-file-input').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
+    });
+    
+    // Initialize datepicker
+    $('.datepicker').datepicker({
+        format: 'dd/mm/yyyy',
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom auto',
+        language: 'id'
+    });
+    
+    // Initialize Select2 untuk kategori
+    $('#{{ form.category.id_for_label }}').select2({
+        placeholder: ' Pilih Kategori ',
+        allowClear: false,
+        dropdownParent: $('#documentModal')
+    });
+});
+</script>

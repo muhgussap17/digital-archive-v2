@@ -1,5 +1,6 @@
 from django import template
 from django.utils import timezone
+import datetime
 import locale
 
 register = template.Library()
@@ -35,7 +36,7 @@ INDONESIAN_DAYS = {
 @register.filter
 def indo_date(value, format_string='long'):
     """
-    Format date to Indonesian format
+    Format tanggal ke format Indonesia.
     
     Usage:
         {{ document.document_date|indo_date }}  -> 15 Januari 2024
@@ -46,7 +47,12 @@ def indo_date(value, format_string='long'):
     if not value:
         return ''
     
-    # Ensure timezone aware
+    # Menangani jika value adalah datetime.date (bukan datetime)
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        # convert ke datetime untuk kompatibilitas format time/datetime
+        value = datetime.datetime.combine(value, datetime.time.min)
+
+    # Pastikan timezone-aware sebelum diformat
     if timezone.is_aware(value):
         value = timezone.localtime(value)
     
@@ -80,7 +86,7 @@ def indo_date(value, format_string='long'):
         return value.strftime('%H:%M')
     
     else:
-        # Default to long format
+        # Default ke format panjang
         month_name = INDONESIAN_MONTHS.get(value.month, value.strftime('%B'))
         return f"{value.day} {month_name} {value.year}"
 

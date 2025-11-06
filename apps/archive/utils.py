@@ -168,18 +168,12 @@ def rename_document_file(document, new_filename=None):
     month = document.document_date.strftime('%m-%B')
     category_path = document.category.get_full_path()
     
-    new_dir = os.path.join(
-        settings.MEDIA_ROOT,
-        'uploads',
-        category_path,
-        year,
-        month
-    )
+    new_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', category_path, year, month)
     
-    # Create directory if not exists
+    # Bikin folder kalo belum ada
     os.makedirs(new_dir, exist_ok=True)
     
-    # Ensure unique filename
+    # Pastikan nama file unik
     new_filename = get_unique_filename(new_dir, new_filename)
     
     new_path = os.path.join(new_dir, new_filename)
@@ -189,13 +183,7 @@ def rename_document_file(document, new_filename=None):
         os.rename(old_path, new_path)
     
     # Update database
-    new_relative_path = os.path.join(
-        'uploads',
-        category_path,
-        year,
-        month,
-        new_filename
-    )
+    new_relative_path = os.path.join('uploads', category_path, year, month, new_filename)
     
     document.file.name = new_relative_path
     document.save(update_fields=['file'])

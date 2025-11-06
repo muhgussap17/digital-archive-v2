@@ -9,7 +9,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" action="{% url 'archive:document_upload' %}" enctype="multipart/form-data">
+
+            <form id="uploadDocumentForm" method="post" action="{% url 'archive:document_upload' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
                     <!-- Document Category - Select2 (belum berfungsi) -->
@@ -20,9 +21,7 @@
                             {% for category in categories %}
                                 {% if category.slug == 'belanjaan' %}
                                     {% for child in category.children.all %}
-                                    <option value="{{ child.id }}">
-                                        {{ child.name }}
-                                    </option>
+                                    <option value="{{ child.id }}">{{ child.name }}</option>
                                     {% endfor %}
                                 {% endif %}
                             {% endfor %}
@@ -54,39 +53,36 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    // Form validation
-    $('#uploadDocumentForm').on('submit', function(e) {
-        const file = $('#document_file')[0].files[0];
-        
-        if (!file) {
-            e.preventDefault();
-            alert('Silakan pilih file PDF terlebih dahulu!');
-            return false;
+$('#uploadDocumentForm').on('submit', function(e) {
+    e.preventDefault();
+    const form = $(this)[0];
+    const data = new FormData(form);
+    const submitBtn = $(this).find('button[type="submit"]');
+
+    submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengunggah...');
+
+    $.ajax({
+        type: 'POST',
+        url: $(this).attr('action'),
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                $('#uploadDocumentModal').modal('hide');
+                showNotification('success', response.message);
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification('danger', 'Gagal mengunggah dokumen.');
+                console.error(response.errors);
+            }
+        },
+        error: function() {
+            showNotification('danger', 'Terjadi kesalahan saat mengirim data.');
+        },
+        complete: function() {
+            submitBtn.prop('disabled', false).html('<i class="fa-solid fa-upload mr-1"></i> Upload');
         }
-        
-        if (file.size > 10 * 1024 * 1024) {
-            e.preventDefault();
-            alert('Ukuran file maksimal 10MB!');
-            return false;
-        }
-        
-        // Show loading
-        const submitBtn = $(this).find('button[type="submit"]');
-        submitBtn.prop('disabled', true);
-        submitBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...');
-    });
-    
-    // Reset form when modal closed
-    $('#uploadDocumentModal').on('hidden.bs.modal', function() {
-        $('#uploadDocumentForm')[0].reset();
-        $('#document_file').next('.custom-file-label').html('Pilih file...');
-        $('#filePreview').hide();
-        $('#generatedFilename').html('<i class="fa-solid fa-file-pdf text-danger"></i> [Kategori]_YYYY-MM-DD.pdf');
-        
-        const submitBtn = $('#uploadDocumentForm').find('button[type="submit"]');
-        submitBtn.prop('disabled', false);
-        submitBtn.html('<i class="fa-solid fa-upload"></i> Upload Dokumen');
     });
 });
 </script>

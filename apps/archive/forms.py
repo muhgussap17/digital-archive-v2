@@ -1,15 +1,18 @@
 from django import forms
+from datetime import date
 from django.core.exceptions import ValidationError
 from .models import Document, DocumentCategory, SPDDocument, Employee
 from .utils import validate_pdf_file
 
 
-class DocumentUploadForm(forms.ModelForm):
-    """Base form for document upload"""
-    
+class DocumentForm(forms.ModelForm):
+    """
+    Form untuk CREATE dokumen
+    """
+
     category = forms.ModelChoiceField(
         queryset=DocumentCategory.objects.filter(parent__isnull=False),
-        empty_label="-- Pilih Kategori --",
+        empty_label=" Pilih Kategori ",
         widget=forms.Select(attrs={
             'class': 'form-control',
             'required': True
@@ -30,7 +33,9 @@ class DocumentUploadForm(forms.ModelForm):
     
     file = forms.FileField(
         widget=forms.FileInput(attrs={
-            'class': 'form-control-file',
+            'class': 'custom-file-input',
+            'id': 'customFileLang',
+            'lang': 'en',
             'accept': 'application/pdf',
             'required': True
         }),
@@ -55,19 +60,82 @@ class DocumentUploadForm(forms.ModelForm):
     
     def clean(self):
         cleaned_data = super().clean()
+
         category = cleaned_data.get('category')
-        
+        document_date = cleaned_data.get('document_date')
+
+        today = date.today()
+
         # Additional validation based on category
         if category and category.slug == 'spd':
             raise ValidationError({
                 'category': 'Untuk dokumen SPD, gunakan form khusus SPD'
             })
         
+        if document_date > date.today(): # type: ignore
+            raise ValidationError({
+                'document_date': 'Tanggal dokumen tidak boleh melebihi hari ini.'
+            })
+        
+        return cleaned_data
+
+
+class DocumentUpdateForm(forms.ModelForm):
+    """
+    Form untuk UPDATE dokumen (metadata only - no file change)
+    """
+    
+    category = forms.ModelChoiceField(
+        queryset=DocumentCategory.objects.filter(parent__isnull=False),
+        empty_label=" Pilih Kategori ",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label='Kategori Dokumen'
+    )
+    
+    document_date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker',
+            'placeholder': 'Pilih tanggal',
+            'autocomplete': 'off',
+            'data-date-format': 'dd/mm/yyyy',
+        }),
+        input_formats=['%Y-%m-%d', '%d/%m/%Y'],
+        label='Tanggal Dokumen'
+    )
+    
+    class Meta:
+        model = Document
+        fields = ['category', 'document_date']  # <-- NO FILE!
+    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        category = cleaned_data.get('category')
+        document_date = cleaned_data.get('document_date')
+
+        today = date.today()
+
+        # Additional validation based on category
+        if category and category.slug == 'spd':
+            raise ValidationError({
+                'category': 'Untuk dokumen SPD, gunakan form khusus SPD'
+            })
+        
+        if document_date > date.today(): # type: ignore
+            raise ValidationError({
+                'document_date': 'Tanggal dokumen tidak boleh melebihi hari ini.'
+            })
+        
         return cleaned_data
 
 
 class SPDDocumentForm(forms.Form):
-    """Form for SPD document upload with employee info"""
+    """
+    Form untuk CREATE SPD dengan employee info
+    """
     
     document_date = forms.DateField(
         widget=forms.DateInput(attrs={
@@ -82,7 +150,9 @@ class SPDDocumentForm(forms.Form):
     
     file = forms.FileField(
         widget=forms.FileInput(attrs={
-            'class': 'form-control-file',
+            'class': 'custom-file-input',
+            'id': 'customFileLang',
+            'lang': 'en',
             'accept': 'application/pdf',
             'required': True
         }),
@@ -92,9 +162,9 @@ class SPDDocumentForm(forms.Form):
     
     employee = forms.ModelChoiceField(
         queryset=Employee.objects.filter(is_active=True),
-        empty_label="-- Pilih Pegawai --",
+        empty_label="Pilih Pegawai",
         widget=forms.Select(attrs={
-            'class': 'form-control select2',
+            'class': 'form-control',
             'required': True
         }),
         label='Nama Pegawai'
@@ -123,8 +193,8 @@ class SPDDocumentForm(forms.Form):
     
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker',
-            'placeholder': 'Tanggal mulai',
+            'class': 'form-control',
+            'placeholder': 'Tanggal Mulai',
             'autocomplete': 'off',
             'data-date-format': 'dd/mm/yyyy',
         }),
@@ -134,8 +204,8 @@ class SPDDocumentForm(forms.Form):
     
     end_date = forms.DateField(
         widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker',
-            'placeholder': 'Tanggal selesai',
+            'class': 'form-control',
+            'placeholder': 'Tanggal Selesai',
             'autocomplete': 'off',
             'data-date-format': 'dd/mm/yyyy',
         }),
@@ -156,13 +226,25 @@ class SPDDocumentForm(forms.Form):
     
     def clean(self):
         cleaned_data = super().clean()
-        
+
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
+        today = date.today()
+
         destination = cleaned_data.get('destination')
         destination_other = cleaned_data.get('destination_other')
         
         # Validate date range
+        if start_date and start_date > today:
+            raise ValidationError({
+                'start_date': "Tanggal mulai tidak boleh melebihi hari ini."
+            })
+
+        if end_date and end_date > today:
+            raise ValidationError({
+                'end_date': "Tanggal selesai tidak boleh melebihi hari ini."
+            })
+
         if start_date and end_date:
             if end_date < start_date:
                 raise ValidationError({
@@ -178,8 +260,114 @@ class SPDDocumentForm(forms.Form):
         return cleaned_data
 
 
+class SPDDocumentUpdateForm(forms.Form):
+    """
+    Form untuk UPDATE SPD (metadata only - no file change)
+    """
+    
+    document_date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker',
+            'placeholder': 'Masukkan Tanggal`',
+            'autocomplete': 'off',
+            'data-date-format': 'dd/mm/yyyy',
+        }),
+        input_formats=['%Y-%m-%d', '%d/%m/%Y'],
+        label='Tanggal SPD'
+    )
+    
+    employee = forms.ModelChoiceField(
+        queryset=Employee.objects.filter(is_active=True),
+        empty_label="Pilih Pegawai",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True
+        }),
+        label='Nama Pegawai'
+    )
+    
+    destination = forms.ChoiceField(
+        choices=SPDDocument.DESTINATION_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'required': True,
+        }),
+        label='Tujuan'
+    )
+    
+    destination_other = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Isi jika memilih "Lainnya"',
+            'id': 'destination_other_field'
+        }),
+        label='Tujuan Lainnya'
+    )
+    
+    start_date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tanggal Mulai',
+            'autocomplete': 'off',
+            'data-date-format': 'dd/mm/yyyy',
+        }),
+        input_formats=['%Y-%m-%d', '%d/%m/%Y'],
+        label='Tanggal Mulai'
+    )
+    
+    end_date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tanggal Selesai',
+            'autocomplete': 'off',
+            'data-date-format': 'dd/mm/yyyy',
+        }),
+        input_formats=['%Y-%m-%d', '%d/%m/%Y'],
+        label='Tanggal Selesai'
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        today = date.today()
+
+        destination = cleaned_data.get('destination')
+        destination_other = cleaned_data.get('destination_other')
+        
+        # Validate date range
+        if start_date and start_date > today:
+            raise ValidationError({
+                'start_date': "Tanggal mulai tidak boleh melebihi hari ini."
+            })
+
+        if end_date and end_date > today:
+            raise ValidationError({
+                'end_date': "Tanggal selesai tidak boleh melebihi hari ini."
+            })
+
+        if start_date and end_date:
+            if end_date < start_date:
+                raise ValidationError({
+                    'end_date': 'Tanggal selesai harus setelah atau sama dengan tanggal mulai'
+                })
+        
+        # Validate destination_other
+        if destination == 'other' and not destination_other:
+            raise ValidationError({
+                'destination_other': 'Harap isi tujuan lainnya'
+            })
+        
+        return cleaned_data
+    
+    
 class DocumentFilterForm(forms.Form):
-    """Form for filtering documents"""
+    """
+    Form untuk filtering documents
+    """
     
     search = forms.CharField(
         required=False,
@@ -231,7 +419,7 @@ class DocumentFilterForm(forms.Form):
         required=False,
         empty_label="Semua Pegawai",
         widget=forms.Select(attrs={
-            'class': 'form-control select2',
+            'class': 'form-control',
             'onchange': 'this.form.submit()'
         }),
         label='Pegawai (SPD)'
@@ -239,7 +427,9 @@ class DocumentFilterForm(forms.Form):
 
 
 class EmployeeForm(forms.ModelForm):
-    """Form for employee management"""
+    """
+    Form untuk pengelolaan employee
+    """
     
     class Meta:
         model = Employee
@@ -294,19 +484,3 @@ class EmployeeForm(forms.ModelForm):
                 raise ValidationError('NIP harus 18 digit')
         
         return nip
-
-
-class DocumentUpdateForm(forms.ModelForm):
-    """Form for updating document metadata"""
-    
-    document_date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker',
-            'placeholder': 'Pilih tanggal',
-            'autocomplete': 'off',
-            'data-date-format': 'dd/mm/yyyy',
-        }),
-        input_formats=['%Y-%m-%d', '%d/%m/%Y'],
-        label='Tanggal Dokumen'
-    )
-    

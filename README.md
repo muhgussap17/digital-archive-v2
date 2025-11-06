@@ -33,8 +33,8 @@ Aplikasi web untuk mendigitalkan dan mengelola dokumen PDF institusi pemerintah.
 ### 2. Clone Repository
 
 ```bash
-git clone <repository-url>
-cd arsip_digital
+git clone https://github.com/muhgussap17/digital-archive-v2.git
+cd digital-archive-v2
 ```
 
 ### 3. Buat Virtual Environment
@@ -107,6 +107,7 @@ python manage.py migrate
 
 ```bash
 python manage.py loaddata initial_categories.json
+python manage.py loaddata initial_employees.json
 ```
 
 ### 9. Buat Superuser
@@ -145,8 +146,8 @@ Setelah login sebagai superuser:
 2. Pilih kategori (ATK, Konsumsi, BBM, dll)
 3. Isi tanggal dokumen
 4. Upload file PDF
-5. Judul dokumen akan otomatis: `Kategori - DD MMMM YYYY`
-6. File akan dinamai: `Kategori_YYYY-MM-DD.pdf`
+5. Judul dokumen akan otomatis: `Kategori - DD MMMM YYYY` # Ditangani pada fungsi get_display_name() pada models.py
+6. File akan dinamai: `Kategori_YYYY-MM-DD.pdf` # Ditangani pada
 
 ### Upload Dokumen SPD
 
@@ -155,8 +156,8 @@ Setelah login sebagai superuser:
 3. Pilih tujuan perjalanan
 4. Isi tanggal mulai dan selesai
 5. Upload file PDF
-6. Judul dokumen akan otomatis: `SPD - NamaPegawai → Tujuan (DD MMMM YYYY)`
-7. File akan dinamai: `SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf`
+6. Judul dokumen akan otomatis: `SPD - NamaPegawai - Tujuan (DD MMMM YYYY)` # Ditangani pada fungsi get_display_name() pada models.py
+7. File akan dinamai: `SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf`# Ditangani pada 
 
 ## 🔍 Pencarian & Filter
 

@@ -21,36 +21,50 @@
         <div class="navbar-inner">
             <!-- Collapse -->
             <div class="collapse navbar-collapse" id="sidenav-collapse-main">
+
                 <!-- Nav items -->
                 <ul class="navbar-nav">
+                    <!-- Dashboard -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'archive:dashboard' %}">
                             <i class="fa-solid fa-chart-line text-default"></i>
                             <span class="nav-link-text">Dashboard</span>
                         </a>
                     </li>
+
+                    <!-- Documents -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'document_list' %}active{% endif %}" href="{% url 'archive:document_list' %}">
+                        <a class="nav-link {% if 'document' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'archive:document_list' %}">
                             <i class="fa-solid fa-folder-open text-info"></i>
                             <span class="nav-link-text">Semua Dokumen</span>
+                            {% if total_documents %}
+                            <span class="badge badge-sm badge-info ml-auto">
+                                {{ total_documents }}
+                            </span>
+                            {% endif %}
                         </a>
                     </li>
                 </ul>
                 
                 <!-- Divider -->
-                <hr class="my-2">
+                <hr class="my-3">
                 
                 <!-- Navigation Heading -->
                 <h6 class="navbar-heading p-0 text-muted">
                     <span class="docs-normal">Kategori</span>
                     <span class="docs-mini">K</span>
                 </h6>
-                <!-- Navigation -->
-                <ul class="navbar-nav mb-md-3">
+
+                <!-- Categories -->
+                <ul class="navbar-nav">
+                    {% comment %}
+                    <!-- Kategori dinamis dari database -->
+                    <!-- Contoh implementasi: -->
+                    {% endcomment %}
+
                     {% for category in categories %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.kwargs.category_slug == category.slug %}active{% endif %}" 
-                           href="{% url 'archive:category_documents' category.slug %}">
+                        <a class="nav-link {% if request.resolver_match.kwargs.category_slug == category.slug %}active{% endif %}" href="{% url 'archive:document_list_by_category' category.slug %}">
                             {% if category.slug == 'spd' %}
                             <i class="fa-solid {{ category.icon }} text-warning"></i>
                             <span class="nav-link-text">{{ category.name }}</span>
@@ -67,12 +81,13 @@
                         </a>
                         
                         {% if category.children.all %}
+                        <!-- Subcategories (Children) -->
                         <ul class="nav nav-sm flex-column">
                             {% for child in category.children.all %}
                             <li class="nav-item">
                                 <a class="nav-link {% if request.resolver_match.kwargs.category_slug == child.slug %}active{% endif %}" 
-                                   href="{% url 'archive:category_documents' child.slug %}">
-                                    <i class="fa-solid {{ child.icon }} text-muted"></i>
+                                   href="{% url 'archive:document_list_by_category' child.slug %}">
+                                    <i class="fa-solid {{ child.icon }} text-default"></i>
                                     <span class="nav-link-text">{{ child.name }}</span>
                                     <span class="badge badge-sm badge-default ml-auto">
                                         {{ child.documents.count }}
@@ -82,6 +97,12 @@
                             {% endfor %}
                         </ul>
                         {% endif %}
+                    </li>
+                    {% empty %}
+                    <li class="nav-item">
+                        <span class="nav-link text-muted">
+                            <span class="nav-link-text">Belum ada kategori</span>
+                        </span>
                     </li>
                     {% endfor %}
                 </ul>
@@ -94,18 +115,22 @@
                     <span class="docs-normal">Upload</span>
                     <span class="docs-mini">U</span>
                 </h6>
+
                 <!-- Upload Actions -->
                 <ul class="navbar-nav">
+                    <!-- Upload Belanjaan -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#uploadSPDModal">
-                            <i class="fa-solid fa-circle-plus text-warning"></i>
-                            <span class="nav-link-text">Upload SPD</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#uploadDocumentModal">
+                        <a class="nav-link" href="#" data-action="upload-document">
                             <i class="fa-solid fa-circle-plus text-success"></i>
                             <span class="nav-link-text">Upload Belanjaan</span>
+                        </a>
+                    </li>
+
+                    <!-- Upload SPD -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-action="upload-spd">
+                            <i class="fa-solid fa-circle-plus text-warning"></i>
+                            <span class="nav-link-text">Upload SPD</span>
                         </a>
                     </li>
                 </ul>

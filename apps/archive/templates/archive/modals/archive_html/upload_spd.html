@@ -9,7 +9,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="uploadSPDForm" method="POST" action="{% url 'archive:spd_upload' %}" enctype="multipart/form-data">
+
+            <form id="uploadSPDForm" method="post" action="{% url 'archive:spd_upload' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
                     <!-- File Upload -->
@@ -30,7 +31,7 @@
                                         name="employee" 
                                         style="width: 100%;"
                                         required>
-                                    <option value="">-- Pilih Pegawai --</option>
+                                    <option value=""> Pilih Pegawai </option>
                                     {% for employee in employees %}
                                     <option value="{{ employee.id }}">
                                         {{ employee.name }} ({{ employee.nip }})
@@ -50,7 +51,7 @@
                                         name="destination"
                                         onchange="toggleDestinationOther(this)"
                                         required>
-                                    <option value="">-- Pilih Tujuan --</option>
+                                    <option value=""> Pilih Tujuan </option>
                                     <optgroup label="Dalam Provinsi Kalimantan Timur">
                                         <option value="balikpapan">Balikpapan</option>
                                         <option value="samarinda">Samarinda</option>
@@ -125,63 +126,36 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    // Initialize Select2 for employee dropdown
-    $('#spd_employee').select2({
-        dropdownParent: $('#uploadSPDModal'),
-        placeholder: '-- Pilih Pegawai --',
-        allowClear: true,
-        width: '100%'
-    });
-    
-    // Custom file input label
-    $('#spd_file').on('change', function() {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').html(fileName);
-    });
-    
-    // Toggle destination other field
-    window.toggleDestinationOther = function(select) {
-        var otherGroup = $('#destination_other_group');
-        var otherField = $('#spd_destination_other');
-        
-        if (select.value === 'other') {
-            otherGroup.show();
-            otherField.prop('required', true);
-        } else {
-            otherGroup.hide();
-            otherField.prop('required', false);
-            otherField.val('');
+$('#uploadSPDForm').on('submit', function(e) {
+    e.preventDefault();
+    const form = $(this)[0];
+    const data = new FormData(form);
+    const submitBtn = $(this).find('button[type="submit"]');
+
+    submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengunggah...');
+
+    $.ajax({
+        type: 'POST',
+        url: $(this).attr('action'),
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                $('#uploadSPDModal').modal('hide');
+                showNotification('success', response.message);
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showNotification('danger', 'Gagal mengunggah SPD.');
+                console.error(response.errors);
+            }
+        },
+        error: function() {
+            showNotification('danger', 'Terjadi kesalahan server.');
+        },
+        complete: function() {
+            submitBtn.prop('disabled', false).html('<i class="fa-solid fa-upload mr-1"></i> Upload');
         }
-    };
-    
-    // Form validation
-    $('#uploadSPDForm').on('submit', function(e) {
-        var startDate = new Date($('#spd_start_date').val().split('/').reverse().join('-'));
-        var endDate = new Date($('#spd_end_date').val().split('/').reverse().join('-'));
-        
-        if (endDate < startDate) {
-            e.preventDefault();
-            alert('Tanggal selesai harus setelah atau sama dengan tanggal mulai!');
-            return false;
-        }
-        
-        // Show loading
-        var submitBtn = $(this).find('button[type="submit"]');
-        submitBtn.prop('disabled', true);
-        submitBtn.html('<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...');
-    });
-    
-    // Reset form ketika modal ditutup
-    $('#uploadSPDModal').on('hidden.bs.modal', function() {
-        $('#uploadSPDForm')[0].reset();
-        $('#spd_employee').val(null).trigger('change');
-        $('#spd_file').next('.custom-file-label').html('Pilih file...');
-        $('#destination_other_group').hide();
-        
-        var submitBtn = $('#uploadSPDForm').find('button[type="submit"]');
-        submitBtn.prop('disabled', false);
-        submitBtn.html('<i class="fa-solid fa-upload"></i> Upload SPD');
     });
 });
 </script>

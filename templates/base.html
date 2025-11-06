@@ -24,6 +24,7 @@
 
     <!-- Select2 -->
     <link href="{% static 'vendor/select2/dist/css/select2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/select2-argon-fix.css' %}" rel="stylesheet">
     
     <!-- Animate.css -->
     <link href="{% static 'vendor/animate.css/animate.min.css' %}" rel="stylesheet">
@@ -88,6 +89,7 @@
             <div class="row ">
                 <!-- Main Content -->
                 <div class="col-12" id="mainContent">
+                    
                     {% block content %}{% endblock %}
                 </div>
                 
@@ -101,6 +103,10 @@
             {% include 'partials/footer.html' %}
         </div>
     </div>
+    
+    <!-- Modal Includes (Global) -->
+    {% include 'archive/modals/document_modal.html' %}
+    {% include 'archive/modals/spd_modal.html' %}
     
     <!-- Core JS -->
     <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
@@ -125,6 +131,7 @@
     
     <!-- Bootstrap Datepicker -->
     <script src="{% static 'vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap-datepicker/dist/locales/bootstrap-datepicker.id.min.js' %}"></script>
     
     <!-- Bootstrap Notify -->
     <script src="{% static 'vendor/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
@@ -132,8 +139,11 @@
     <!-- Custom JS -->
     <script src="{% static 'js/custom.js' %}"></script>
     
+    <!-- Modal Handler JS -->
+    <script src="{% static 'js/modal_handler.js' %}"></script>
+
     <script>
-        // CSRF token untuk AJAX
+        // CSRF token untuk AJAX - IMPROVED
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -148,46 +158,28 @@
             }
             return cookieValue;
         }
+        
+        // Get CSRF token
         const csrftoken = getCookie('csrftoken');
+        console.log('CSRF Token loaded:', csrftoken ? 'OK' : 'FAILED');
         
         // Setup AJAX dengan CSRF token
         $.ajaxSetup({
             beforeSend: function(xhr, settings) {
                 if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    // Ambil token dari cookie atau input hidden
+                    const token = csrftoken || $('[name=csrfmiddlewaretoken]').val();
+                    if (token) {
+                        xhr.setRequestHeader("X-CSRFToken", token);
+                    }
                 }
             }
-        });
-
-        // Inisialisasi datepicker
-        $('.datepicker').datepicker({
-            format: 'dd/mm/yyyy',
-            language: 'id',
-            autoclose: true,
-            todayHighlight: true,
-            todayBtn: 'linked',
-            orientation: 'bottom auto'
         });
         
         // Auto-hide alerts
         setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
-        
-        // Toggle field destination_other (untuk upload SPD dengan tujuan "Lainnya")
-        function toggleDestinationOther(select) {
-            var otherGroup = $(select).closest('form').find('#destination_other_group');
-            var otherField = $(select).closest('form').find('[name="destination_other"]');
-            
-            if (select.value === 'other') {
-                otherGroup.show();
-                otherField.prop('required', true);
-            } else {
-                otherGroup.hide();
-                otherField.prop('required', false);
-                otherField.val('');
-            }
-        }
         
         // Menampilkan notifikasi menggunakan Bootstrap Notify
         function showNotification(type, message, title) {

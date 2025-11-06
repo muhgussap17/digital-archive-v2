@@ -1,25 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
 import os
 from datetime import datetime
-
-
-class User(AbstractUser):
-    """Extended User model"""
-    full_name = models.CharField(max_length=255, verbose_name="Nama Lengkap")
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'users'
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
-    
-    def __str__(self):
-        return f"{self.full_name} ({self.username})"
 
 
 class DocumentCategory(models.Model):
@@ -44,7 +28,7 @@ class DocumentCategory(models.Model):
     
     def __str__(self):
         if self.parent:
-            return f"{self.parent.name} > {self.name}"
+            return self.name
         return self.name
     
     def save(self, *args, **kwargs):
@@ -66,8 +50,8 @@ class Employee(models.Model):
     position = models.CharField(max_length=100, verbose_name="Jabatan")
     department = models.CharField(max_length=100, verbose_name="Unit Kerja")
     is_active = models.BooleanField(default=True, verbose_name="Status Aktif")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     
     class Meta:
         db_table = 'employees'
@@ -76,7 +60,7 @@ class Employee(models.Model):
         ordering = ['name']
     
     def __str__(self):
-        return f"{self.name} ({self.nip})"
+        return f"{self.name} - {self.nip}"
 
 
 def document_upload_path(instance, filename):
@@ -109,7 +93,7 @@ class Document(models.Model):
         related_name='documents'
     )
     created_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='documents_created'
     )
@@ -118,8 +102,6 @@ class Document(models.Model):
     version = models.IntegerField(default=1)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
-    # title = models.CharField(max_length=255, verbose_name="Judul Dokumen")
-    # description = models.TextField(blank=True, null=True, verbose_name="Deskripsi")
     
     class Meta:
         db_table = 'documents'
@@ -133,8 +115,8 @@ class Document(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.category} - {self.document_date}" # type: ignore
-    
+        return self.get_display_name()    
+
     def get_display_name(self):
         """Generate display name from metadata"""
         try:
@@ -142,7 +124,7 @@ class Document(models.Model):
                 spd = self.spd_info # type: ignore
                 from django.template.defaultfilters import date as date_filter
                 date_str = date_filter(self.document_date, 'd F Y')
-                return f"SPD - {spd.employee.name} → {spd.get_destination_display_full()} ({date_str})"
+                return f"SPD - {spd.employee.name} - {spd.get_destination_display_full()} ({date_str})"
         except:
             pass
 
@@ -274,7 +256,7 @@ class DocumentActivity(models.Model):
         related_name='activities'
     )
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='document_activities'
@@ -305,7 +287,7 @@ class SystemSetting(models.Model):
     value = models.TextField()
     description = models.TextField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     
     class Meta:
         db_table = 'system_settings'

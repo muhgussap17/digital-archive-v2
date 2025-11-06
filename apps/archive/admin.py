@@ -3,35 +3,9 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.db.models import Count
 from .models import (
-    User, Employee, DocumentCategory, Document, 
+    Employee, DocumentCategory, Document, 
     SPDDocument, DocumentActivity, SystemSetting
 )
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    """Admin for User model"""
-    list_display = ['username', 'full_name', 'email', 'is_staff', 'is_active', 'created_at']
-    list_filter = ['is_staff', 'is_active', 'created_at']
-    search_fields = ['username', 'full_name', 'email']
-    ordering = ['-created_at']
-    
-    fieldsets = (
-        ('Informasi Login', {
-            'fields': ('username', 'password')
-        }),
-        ('Informasi Personal', {
-            'fields': ('full_name', 'email', 'phone')
-        }),
-        ('Permissions', {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
-        }),
-        ('Tanggal Penting', {
-            'fields': ('last_login', 'date_joined')
-        }),
-    )
-    
-    readonly_fields = ['last_login', 'date_joined']
 
 
 @admin.register(Employee)
@@ -209,7 +183,7 @@ class SPDDocumentAdmin(admin.ModelAdmin):
         ('Detail Perjalanan', {
             'fields': (
                 'destination', 'destination_other',
-                'start_date', 'end_date'
+                'start_date', 'end_date', 'duration'
             )
         }),
         ('Timestamp', {
@@ -221,22 +195,22 @@ class SPDDocumentAdmin(admin.ModelAdmin):
     def document_title(self, obj):
         """Get document title"""
         url = reverse('admin:archive_document_change', args=[obj.document.id])
-        return format_html('<a href="{}">{}</a>', url, obj.document.file)
+        return format_html('<a href="{}">{}</a>', url, obj.document.title)
     
-    document_title.short_description = 'Dokumen' # pyright: ignore[reportFunctionMemberAccess]
+    document_title.short_description = 'Dokumen' # type: ignore
     
     def destination_display(self, obj):
         """Display destination"""
         return obj.get_destination_display_full()
     
-    destination_display.short_description = 'Tujuan' # pyright: ignore[reportFunctionMemberAccess]
+    destination_display.short_description = 'Tujuan' # type: ignore
     
     def duration(self, obj):
         """Display trip duration"""
         days = obj.get_duration_days()
         return f'{days} hari'
     
-    duration.short_description = 'Durasi' # pyright: ignore[reportFunctionMemberAccess]
+    duration.short_description = 'Durasi' # type: ignore
     
     def get_queryset(self, request):
         """Optimize queries"""
@@ -271,10 +245,10 @@ class DocumentActivityAdmin(admin.ModelAdmin):
     )
     
     def document_title(self, obj):
-        """Get document title with link"""
+        """Get document display name with link"""
         if obj.document:
             url = reverse('admin:archive_document_change', args=[obj.document.id])
-            return format_html('<a href="{}">{}</a>', url, obj.document.file)
+            return format_html('<a href="{}">{}</a>', url, obj.document.get_display_name())
         return '-'
     
     document_title.short_description = 'Dokumen' # type: ignore

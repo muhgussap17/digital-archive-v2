@@ -13,8 +13,8 @@
 
 {% block header_actions %}
 <button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#filterModal">Filter</button>
-<button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#uploadDocumentModal">Upload Belanjaan</button>
-<button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#uploadSPDModal">Upload SPD</button>
+<button class="btn btn-sm btn-secondary" data-action="upload-document">Upload Belanjaan</button>
+<button class="btn btn-sm btn-secondary" data-action="upload-spd">Upload SPD</button>
 {% endblock %}
 
 {% block content %}
@@ -22,6 +22,7 @@
 <div class="row">
     <div class="col-12" id="mainContent">
         <div class="card shadow">
+            <!-- Card Header -->
             <div class="card-header border-0 bg-transparent">
                 <div class="row align-items-center">
                     <div class="col">
@@ -49,18 +50,22 @@
                 </div>
             </div>
             
+            <!-- Card Body -->
             <div class="table-responsive">
                 <table class="table align-items-center table-flush" id="documentsTable">
+                    <!-- Table Head -->
                     <thead class="thead-light">
                         <tr>
-                            <th scope="col" class="sort" data-sort="name">Dokumen</th>
-                            <th scope="col" class="sort" data-sort="category">Kategori</th>
-                            <th scope="col" class="sort" data-sort="date">Tanggal</th>
-                            <th scope="col" class="sort" data-sort="size">Ukuran</th>
-                            <th scope="col" class="sort" data-sort="uploader">Diupload</th>
+                            <th scope="col">Dokumen</th>
+                            <!-- <th scope="col">Kategori</th> -->
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">Ukuran</th>
+                            <th scope="col">Diupload</th>
                             <th scope="col" class="text-right">Aksi</th>
                         </tr>
                     </thead>
+
+                    <!-- Table Body -->
                     <tbody class="list">
                         {% for document in page_obj %}
                         <tr class="document-row" data-document-id="{{ document.id }}">
@@ -88,11 +93,11 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="category">
+                            <!-- <td class="category">
                                 <span class="{% get_badge_class document.category.slug 'pill' %}">
                                     {{ document.category.name }}
                                 </span>
-                            </td>
+                            </td> -->
                             <td class="date">
                                 <span class="text-sm">{{ document.document_date|indo_date }}</span><br>
                                 <small class="text-muted">
@@ -118,13 +123,7 @@
                             </td>
                             <td class="text-right">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button"
-                                       class="btn btn-info"
-                                       onclick="showDetailPanel({{ document.id }})"
-                                       data-toggle="tooltip" 
-                                       title="Detail">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </button>
+                                    <!-- Preview -->
                                     <a href="{% url 'archive:document_preview' document.id %}" 
                                        class="btn btn-secondary" 
                                        target="_blank"
@@ -132,12 +131,42 @@
                                        title="Preview">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
+
+                                    <!-- Download -->
                                     <a href="{% url 'archive:document_download' document.id %}" 
                                        class="btn btn-success"
                                        data-toggle="tooltip" 
                                        title="Download">
                                         <i class="fa-solid fa-download"></i>
                                     </a>
+
+                                    <!-- Edit (Staff Only) -->
+                                    {% if request.user.is_staff %}
+                                        <button type="button"
+                                           class="btn btn-warning"
+                                           {% if document.spd_info %}
+                                           data-action="edit-spd"
+                                           {% else %}
+                                           data-action="edit-document"
+                                           {% endif %}
+                                           data-document-id="{{ document.id }}"
+                                           data-toggle="tooltip" 
+                                           title="Edit">
+                                            <i class="fa-solid fa-edit"></i>
+                                        </button>
+                                        
+                                        <!-- Delete (Staff Only) -->
+                                        <button type="button"
+                                           class="btn btn-danger"
+                                           data-action="delete-document"
+                                           data-document-id="{{ document.id }}"
+                                           data-document-name="{{ document.get_display_name }}"
+                                           data-document-type="{% if document.spd_info %}spd{% else %}document{% endif %}"
+                                           data-toggle="tooltip" 
+                                           title="Hapus">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -147,7 +176,6 @@
                                 <div class="text-center py-4">
                                     <i class="fa-solid fa-folder-open fa-4x text-muted mb-3"></i>
                                     <p class="text-sm text-muted mb-4">Belum ada dokumen yang diunggah</p>
-                                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#uploadDocumentModal">Upload Dokumen</button>
                                 </div>
                             </td>
                         </tr>
@@ -207,8 +235,6 @@
 </div>
 
 <!-- Include Upload Modals -->
-{% include 'archive/modals/upload_document.html' %}
-{% include 'archive/modals/upload_spd.html' %}
 {% include 'archive/modals/filter.html' %}
 {% endblock %}
 

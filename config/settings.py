@@ -26,7 +26,8 @@ INSTALLED_APPS = [
 
     # Third party apps
     'rest_framework',
-    # 'django_filters',
+    'django_filters',
+    'django_extensions',
     'corsheaders',
     
     # Local apps
@@ -64,6 +65,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'apps.archive.context_processors.global_context',  # Custom context processor
+                'apps.archive.context_processors.sidebar_context',  # Custom context processor
             ],
         },
     },
@@ -100,7 +102,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Custom user model
-AUTH_USER_MODEL = 'archive.User'
+# AUTH_USER_MODEL = 'archive.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 # Internationalization
 LANGUAGE_CODE = 'id-id'
@@ -126,8 +129,10 @@ MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security settings
+CSRF_COOKIE_NAME = 'csrftoken' # baru ditambahkan
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False 
+CSRF_USE_SESSIONS = False # baru ditambahkan
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 

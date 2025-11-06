@@ -1,0 +1,248 @@
+{% load static %}
+{% load custom_tags %}
+<!-- Form Content untuk Upload/Edit Dokumen SPD -->
+
+{% if is_update %}
+    <!-- Info dokumen existing -->
+    <div class="alert alert-info mb-3">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong>Edit Mode:</strong> File tidak dapat diganti. Hanya metadata yang dapat diubah.
+    </div>
+{% endif %}
+
+<div class="row">
+    <!-- Tanggal SPD -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.document_date.id_for_label }}">
+                {{ form.document_date.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.document_date }}
+            {% if form.document_date.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.document_date.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                Tanggal dokumen SPD
+            </small> -->
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Pegawai -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.employee.id_for_label }}">
+                {{ form.employee.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.employee }}
+            {% if form.employee.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.employee.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                Pilih pegawai yang melakukan perjalanan dinas
+            </small> -->
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Tujuan -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.destination.id_for_label }}">
+                {{ form.destination.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.destination }}
+            {% if form.destination.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.destination.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                Tujuan perjalanan dinas
+            </small> -->
+        </div>
+    </div>
+</div>
+
+<div class="row" id="destination_other_group" style="display: none;">
+    <!-- Tujuan Lainnya (conditional) -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.destination_other.id_for_label }}">
+                {{ form.destination_other.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.destination_other }}
+            {% if form.destination_other.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.destination_other.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                Isi jika memilih "Lainnya"
+            </small> -->
+        </div>
+    </div>
+</div>
+
+<div class="row input-daterange datepicker align-items-center">
+    <!-- Tanggal Mulai -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.start_date.id_for_label }}">
+                {{ form.start_date.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.start_date }}
+            <!-- <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </span>
+                </div>
+            </div> -->
+            {% if form.start_date.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.start_date.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Tanggal Selesai -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.end_date.id_for_label }}">
+                {{ form.end_date.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.end_date }}
+            <!-- <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </span>
+                </div>
+            </div> -->
+            {% if form.end_date.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.end_date.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- File Upload -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.file.id_for_label }}">
+                {{ form.file.label }}
+                {% if not is_update %}<span class="text-danger">*</span>{% endif %}
+            </label>
+            
+            {% if is_update %}
+                <!-- Display existing file info -->
+                <div class="alert alert-light border mb-2">
+                    <i class="fa-solid fa-file-pdf text-danger"></i>
+                    <strong>File saat ini:</strong> {{ document.file.name|split:'/'|last }}
+                    <br>
+                    <small class="text-muted">
+                        Ukuran: {{ document.get_file_size_display }}
+                    </small>
+                </div>
+            {% endif %}
+            
+            <div class="custom-file">
+                {{ form.file }}
+                <label class="custom-file-label" for="{{ form.file.id_for_label }}">
+                    {% if is_update %}File tidak dapat diganti{% else %}Pilih file PDF...{% endif %}
+                </label>
+            </div>
+            
+            {% if form.file.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.file.errors.0 }}
+                </div>
+            {% endif %}
+            
+            {% if form.file.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.file.help_text }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Non-field errors (if any) -->
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+
+<script>
+$(document).ready(function() {
+    // Custom file input label update
+    $('.custom-file-input').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
+    });
+    
+    // Initialize datepicker
+    $('.datepicker').datepicker({
+        format: 'dd/mm/yyyy',
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom auto',
+        language: 'id'
+    });
+    
+    // Initialize Select2 untuk employee
+    $('#{{ form.employee.id_for_label }}').select2({
+        placeholder: 'Pilih Pegawai',
+        allowClear: false,
+        dropdownParent: $('#SPDModal')
+    });
+    
+    // Initialize Select2 untuk tujuan
+    $('#{{ form.destination.id_for_label }}').select2({
+        placeholder: 'Pilih Tujuan',
+        allowClear: false,
+        dropdownParent: $('#SPDModal')
+    });
+    
+    // Toggle destination_other field
+    function toggleDestinationOther() {
+        var destination = $('#{{ form.destination.id_for_label }}').val();
+        var otherGroup = $('#destination_other_group');
+        var otherField = $('#{{ form.destination_other.id_for_label }}');
+        
+        if (destination === 'other') {
+            otherGroup.show();
+            otherField.prop('required', true);
+        } else {
+            otherGroup.hide();
+            otherField.prop('required', false);
+            otherField.val('');
+        }
+    }
+    
+    // Check on load
+    toggleDestinationOther();
+    
+    // Check on change
+    $('#{{ form.destination.id_for_label }}').on('change', toggleDestinationOther);
+});
+</script>

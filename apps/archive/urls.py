@@ -7,21 +7,23 @@ urlpatterns = [
     # Dashboard
     path('', views.dashboard, name='dashboard'),
     
-    # Document CRUD
+    # Document List & Filter
     path('documents/', views.document_list, name='document_list'),
-    path('documents/<int:document_id>/', views.document_detail, name='document_detail'),
-    path('documents/<int:document_id>/preview/', views.document_preview, name='document_preview'),
-    path('documents/<int:document_id>/download/', views.document_download, name='document_download'),
-    path('documents/<int:document_id>/update/', views.document_update, name='document_update'),
-    path('documents/<int:document_id>/delete/', views.document_delete, name='document_delete'),
-    
-    # Upload
-    path('upload/', views.document_upload, name='document_upload'),
-    path('upload/spd/', views.spd_upload, name='spd_upload'),
-    
-    # Category filtering
-    path('category/<slug:category_slug>/', views.category_documents, name='category_documents'),
-    
-    # Search
-    path('search/', views.search_documents, name='search_documents'),
+    path('documents/category/<slug:category_slug>/', views.document_list, name='document_list_by_category'),
+    path('documents/search/', views.search_documents, name='document_search'), 
+
+    # Document CRUD (Modal/AJAX endpoints)
+    path('documents/create/', views.document_create, name='document_create'), # Upload via modal
+    path('documents/<int:pk>/update/', views.document_update, name='document_update'), # Edit via modal
+    path('documents/<int:pk>/delete/', views.document_delete, name='document_delete'), # Soft delete action
+
+    # SPD CRUD (Modal/AJAX endpoints)
+    path('spd/create/', views.spd_create, name='spd_create'), # Upload via modal
+    path('spd/<int:pk>/update/', views.spd_update, name='spd_update'), # Edit via modal
+    path('spd/<int:pk>/delete/', views.spd_delete, name='spd_delete'), # Soft delete action
+
+    # Document Actions (View, Preview, Download)
+    path('documents/<int:pk>/', views.document_detail, name='document_detail'), # Detail action via panel
+    path('documents/<int:pk>/preview/', views.document_preview, name='document_preview'), # Preview action
+    path('documents/<int:pk>/download/', views.document_download, name='document_download'), # Download action
 ]

@@ -1,0 +1,277 @@
+[
+    {
+        "model": "archive.employee",
+        "pk": 1,
+        "fields": {
+        "nip": "198403272010012014",
+        "name": "Hj. Sri Rezeki Marietha, S.Ik., M.Si",
+        "position": "Kabag. Materi dan Komunikasi Pimpinan",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 2,
+        "fields": {
+        "nip": "197901182009011001",
+        "name": "M. Huseni Labib, S.H.",
+        "position": "Pranata Hubungan Masyarakat Ahli Muda",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 3,
+        "fields": {
+        "nip": "197406132007012015",
+        "name": "Erni Yusnita, S.Sos",
+        "position": "Pranata Hubungan Masyarakat Ahli Muda",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 4,
+        "fields": {
+        "nip": "197406262002121005",
+        "name": "Soegiyanto, S.S.",
+        "position": "Pranata Hubungan Masyarakat Ahli",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 5,
+        "fields": {
+        "nip": "198305162009022008",
+        "name": "Anitha Rahayu, S.IP, M.A",
+        "position": "Analis Publikasi",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 6,
+        "fields": {
+        "nip": "198801042015031004",
+        "name": "Agna Fadhly, S.S",
+        "position": "Penerjemah Ahli Pertama",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 7,
+        "fields": {
+        "nip": "196808182007011032",
+        "name": "Achmad Agus Santoso",
+        "position": "Pengadministrasi Analisis Kemitraan",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 8,
+        "fields": {
+        "nip": "197108052008011020",
+        "name": "Amir Hasan",
+        "position": "Pengadministrasi Analisis Kemitraan",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 9,
+        "fields": {
+        "nip": "199409182016091001",
+        "name": "Reynaldi Akhmad, S.STP",
+        "position": "Analis Pelayanan",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 10,
+        "fields": {
+        "nip": "197509132025211006",
+        "name": "Samsul Arifin",
+        "position": "Pengadministrasi Perkantoran",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 11,
+        "fields": {
+        "nip": "197010282025211006",
+        "name": "Mardiansyah, SH",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 12,
+        "fields": {
+        "nip": "198203072025211018",
+        "name": "M. Norjaya, SE",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 13,
+        "fields": {
+        "nip": "196909102025211007",
+        "name": "Umar, S.Pd",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 14,
+        "fields": {
+        "nip": "199005072025211021",
+        "name": "Adi Suseno, SE",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 15,
+        "fields": {
+        "nip": "199207022025212024",
+        "name": "Rizky Amalia, A.Md",
+        "position": "Pengelola Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 16,
+        "fields": {
+        "nip": "199301082025211011",
+        "name": "Syaid Fathur Rachman, S.Kom",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 17,
+        "fields": {
+        "nip": "199905162025211005",
+        "name": "Ahmad Riyandi",
+        "position": "Pengadministrasi Perkantoran",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 18,
+        "fields": {
+        "nip": "199110132025212009",
+        "name": "Yuvita Indrasari, S.Pd",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 19,
+        "fields": {
+        "nip": "199502022025212021",
+        "name": "Netilyawati, S.Sos",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 20,
+        "fields": {
+        "nip": "199302222025211005",
+        "name": "Arief Murtadha, S.Ds",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 21,
+        "fields": {
+        "nip": "199403292025212013",
+        "name": "Cinthia Ayu Azhari, S.I.Kom",
+        "position": "Penataan Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 22,
+        "fields": {
+        "nip": "198109212025211018",
+        "name": "Heru Renaldi",
+        "position": "Pengadministrasi Perkantoran",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 23,
+        "fields": {
+        "nip": "199011262025211013",
+        "name": "Hudais Tri Putra, S.Kom",
+        "position": "Penata Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 24,
+        "fields": {
+        "nip": "",
+        "name": "Sayid Alman Fausa, S.T",
+        "position": "Pengelola Dokumentasi",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    },
+    {
+        "model": "archive.employee",
+        "pk": 25,
+        "fields": {
+        "nip": "199510022025212019",
+        "name": "Evi Khusnul Khotimah, S.Ds",
+        "position": "Penata Layanan Operasional",
+        "department": "Bagian Materi dan Komunikasi Pimpinan",
+        "is_active": true
+        }
+    }
+]

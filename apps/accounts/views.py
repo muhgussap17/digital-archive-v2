@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count
 from apps.archive.models import Document, DocumentActivity
+from .forms import ProfileEditForm
 
 
 @login_required
@@ -59,20 +60,24 @@ def profile(request):
 
 @login_required
 def profile_edit(request):
-    """Edit user profile"""
-    if request.method == 'POST':
-        user = request.user
-        
-        # Update basic info
-        user.full_name = request.POST.get('full_name', user.full_name)
-        user.email = request.POST.get('email', user.email)
-        user.phone = request.POST.get('phone', user.phone)
-        
-        try:
-            user.save()
-            messages.success(request, 'Profil berhasil diperbarui!')
-            return redirect('accounts:profile')
-        except Exception as e:
-            messages.error(request, f'Gagal memperbarui profil: {str(e)}')
+    """Mengedit profil pengguna menggunakan ModelForm yang aman."""
+    user = request.user
     
-    return render(request, 'accounts/profile_edit.html')
+    if request.method == 'POST':
+        # Isi form dengan data POST, dan jadikan 'instance' sebagai user saat ini
+        form = ProfileEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profil Anda berhasil diperbarui.')
+            return redirect('accounts:profile')
+        else:
+            messages.error(request, 'Terjadi kesalahan. Mohon periksa data Anda.')
+    else:
+        # Untuk method GET, tampilkan form yang sudah terisi data user saat ini
+        form = ProfileEditForm(instance=request.user)     
+
+    context = {
+        'form': form
+    }
+    # Render ke template yang berisi form Anda
+    return render(request, 'accounts/profile_edit.html', context)

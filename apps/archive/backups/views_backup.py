@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+# from django.core.exceptions import PermissionDenied
 from django.contrib import messages
-from django.http import JsonResponse, FileResponse, Http404, HttpResponse
+from django.http import JsonResponse, FileResponse, Http404
 from django.template.loader import render_to_string
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models.functions import TruncMonth # Digunakan di dashboard
 from datetime import datetime, timedelta # Digunakan di dashboard
-from functools import wraps
 
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
@@ -23,7 +22,7 @@ from apps.accounts.decorators import staff_required
 from apps.accounts.permissions import IsStaffOrReadOnly
 
 from .models import Document, DocumentCategory, SPDDocument, DocumentActivity, Employee
-from .forms import DocumentFilterForm, DocumentForm, DocumentUpdateForm, SPDDocumentForm, SPDDocumentUpdateForm, EmployeeForm
+from .forms import DocumentFilterForm, DocumentForm, SPDDocumentForm, EmployeeForm
 from .serializers import DocumentSerializer, CategorySerializer, SPDSerializer
 from .utils import log_activity, rename_document_file, get_client_ip
 import logging
@@ -31,36 +30,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def staff_required(function=None, redirect_url='/accounts/login/'):
-    """
-    Decorator untuk memastikan user adalah staff
-    FIXED VERSION - properly wraps and calls the view function
-    """
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                messages.warning(request, 'Anda harus login terlebih dahulu.')
-                return redirect(redirect_url)
-            
-            if not request.user.is_staff:
-                messages.error(request, 'Anda tidak memiliki akses ke halaman ini.')
-                return redirect('archive:dashboard')
-            
-            # CRITICAL: Actually call the view function and return its response
-            return view_func(request, *args, **kwargs)
-        
-        return _wrapped_view
-    
-    if function:
-        return decorator(function)
-    
-    return decorator
+# ==================== TEMPLATE VIEWS ====================
 
-
-# ==================== DASHBOARD VIEWS ====================
-
-# Dashboard old logic
 @login_required
 def dashboard(request):
     """Main dashboard view"""
@@ -123,9 +94,6 @@ def dashboard(request):
     return render(request, 'archive/dashboard.html', context)
 
 
-# ==================== TEMPLATE VIEWS ====================
-
-# List updated logic
 @login_required
 def document_list(request, category_slug=None):
     """
@@ -194,6 +162,9 @@ def document_list(request, category_slug=None):
         # Employee filter (for SPD)
         if employee:
             documents = documents.filter(spd_info__employee=employee)
+    
+    # Get total results before pagination
+    total_results = documents.count()
 
     # Pagination
     paginator = Paginator(documents, 20)
@@ -211,8 +182,40 @@ def document_list(request, category_slug=None):
 
 
 @login_required
-def search_documents(request):
-    return HttpResponse("<h1>Halaman ini masih dalam pengembangan 🚧</h1>")
+def document_detail(request, document_id):
+    """Document detail view with activities"""
+    document = get_object_or_404(
+        Document.objects.select_related('category', 'created_by'),
+        id=document_id,
+        is_deleted=False
+    )
+    
+    # Log view activity
+    log_activity(
+        document=document,
+        user=request.user,
+        action_type='view',
+        request=request
+    )
+    
+    # Get SPD info if exists
+    spd_info = None
+    try:
+        spd_info = document.spd_info # type: ignore
+    except SPDDocument.DoesNotExist:
+        pass
+    
+    # Get activities
+    activities = document.activities.select_related('user').order_by('-created_at')[:50] # type: ignore
+    
+    context = {
+        'document': document,
+        'spd_info': spd_info,
+        'activities': activities,
+    }
+    
+    return render(request, 'archive/document_detail.html', context)
+
 
 # ==================== DOCUMENT CRUD ====================
 
@@ -325,8 +328,9 @@ def document_update(request, pk):
         return redirect('archive:document_list')
     
     if request.method == 'POST':
-        # Use UPDATE form (no file field)
-        form = DocumentUpdateForm(request.POST, instance=document)
+        form = DocumentForm(request.POST, instance=document)
+        # File tidak bisa diganti saat update
+        form.fields['file'].required = False
         
         if form.is_valid():
             try:
@@ -383,8 +387,12 @@ def document_update(request, pk):
                 })
     
     else:
-        # GET request - return form with existing data (no file field)
-        form = DocumentUpdateForm(instance=document)
+        # GET request - return form with existing data
+        form = DocumentForm(instance=document)
+        # File field tidak bisa diganti (metadata only)
+        form.fields['file'].required = False
+        form.fields['file'].widget.attrs['disabled'] = True
+        form.fields['file'].help_text = 'File tidak dapat diganti saat edit. Hanya metadata yang dapat diubah.'
         
         if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
             html = render_to_string('archive/forms/document_form_content.html', {
@@ -585,11 +593,12 @@ def spd_update(request, pk):
         
         return redirect('archive:document_list')
     
-    spd = document.spd_info
+    spd = document.spd_info # type: ignore
     
     if request.method == 'POST':
-        # Use UPDATE form (no file field)
-        form = SPDDocumentUpdateForm(request.POST)
+        form = SPDDocumentForm(request.POST)
+        # File tidak bisa diganti saat update
+        form.fields['file'].required = False
         
         if form.is_valid():
             try:
@@ -747,22 +756,296 @@ def spd_delete(request, pk):
     
     return redirect('archive:document_list')
 
-
 # ==================== VIEWS LAMA ====================
 
-@login_required
-def document_detail(request, document_id):
-    return HttpResponse("<h1>Halaman ini masih dalam pengembangan 🚧</h1>")
+@staff_required 
+@require_http_methods(["POST"])
+def document_upload(request):
+    """
+    Menangani upload dokumen belanjaan (non-SPD) via AJAX modal.
+    HANYA UNTUK STAFF.
+    """
+    form = DocumentUploadForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        try:
+            with transaction.atomic():
+                document = form.save(commit=False)
+                document.created_by = request.user
+                document.save()
+                rename_document_file(document)
+                log_activity(
+                    document=document,
+                    user=request.user,
+                    action_type='create',
+                    # description=f'Dokumen berhasil diunggah: {document.title}',
+                    request=request
+                )
+                return JsonResponse({'success': True, 'message': 'Dokumen berhasil diunggah!'})
+        except Exception as e:
+            logger.error(f"Error in document_upload_ajax: {e}")
+            return JsonResponse({'success': False, 'message': 'Terjadi kesalahan server.'})
+    else:
+        return JsonResponse({'success': False, 'errors': form.errors})
+
+
+@staff_required
+@require_http_methods(["POST"])
+def spd_upload(request):
+    """Upload SPD via AJAX modal"""
+    form = SPDDocumentForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        try:
+            with transaction.atomic():
+                spd_category = DocumentCategory.objects.get(slug='spd')
+                document = Document.objects.create(
+                    file=form.cleaned_data['file'],
+                    document_date=form.cleaned_data['document_date'],
+                    category=spd_category,
+                    created_by=request.user
+                )
+                SPDDocument.objects.create(
+                    document=document,
+                    employee=form.cleaned_data['employee'],
+                    destination=form.cleaned_data['destination'],
+                    destination_other=form.cleaned_data.get('destination_other', ''),
+                    start_date=form.cleaned_data['start_date'],
+                    end_date=form.cleaned_data['end_date']
+                )
+                rename_document_file(document)
+                log_activity(
+                    document=document,
+                    user=request.user,
+                    action_type='create',
+                    # description=f'SPD berhasil diunggah: {form.cleaned_data["employee"].name}',
+                    request=request
+                )
+                return JsonResponse({'success': True, 'message': 'SPD berhasil diunggah!'})
+        except Exception as e:
+            logger.error(f"Error in spd_upload_ajax: {e}")
+            return JsonResponse({'success': False, 'message': 'Terjadi kesalahan server.'})
+    else:
+        return JsonResponse({'success': False, 'errors': form.errors})
+
+
+# @staff_required
+# @require_http_methods(["GET", "POST"])
+# def document_update(request, document_id):
+#     """Edit dokumen via modal AJAX"""
+#     document = get_object_or_404(Document, id=document_id, is_deleted=False)
+    
+#     if request.method == 'POST':
+#         form = DocumentUpdateForm(request.POST, instance=document)
+
+#         if form.is_valid():
+#             try:
+#                 with transaction.atomic():
+#                     old_date = document.document_date                    
+#                     document = form.save()
+#                     if old_date != document.document_date:
+#                         rename_document_file(document)
+#                     changes = []
+#                     if old_date != document.document_date:
+#                         changes.append(f"Tanggal: {old_date} → {document.document_date}") # type: ignore
+#                     log_activity(
+#                         document=document,
+#                         user=request.user,
+#                         action_type='update',
+#                         # description=f'Dokumen diperbarui: {", ".join(changes)}', # type: ignore
+#                         request=request
+#                     )
+#                     return JsonResponse({'success': True, 'message': 'Dokumen berhasil diperbarui!'})
+                    
+#             except Exception as e:
+#                 logger.error(f"Error updating document: {e}")
+#                 return JsonResponse({'success': False, 'message': f"Gagal memperbarui dokumen: {str(e)}"}) # (request, f'Gagal memperbarui dokumen: {str(e)}')
+#         else:
+#             return JsonResponse({'success': False, 'errors': form.errors})
+
+#     else:
+#         form = DocumentUpdateForm(instance=document)
+#         html_form = render_to_string( # pyright: ignore[reportUndefinedVariable]
+#             'archive/modals/edit_document.html', 
+#             {'form': form, 'document': document},
+#             request=request,
+#         )
+#         return JsonResponse({'success': True, 'html': html_form})
+
+
+# @staff_required
+# @require_http_methods(["POST"])
+# def document_delete(request, document_id):
+#     """Soft delete document"""
+#     document = get_object_or_404(Document, id=document_id, is_deleted=False)
+    
+#     try:
+#         with transaction.atomic():
+#             document.is_deleted = True
+#             document.deleted_at = timezone.now()
+#             document.save(update_fields=['is_deleted', 'deleted_at'])
+            
+#             # Log activity
+#             log_activity(
+#                 document=document,
+#                 user=request.user,
+#                 action_type='delete',
+#                 description=f'Dokumen dihapus: {document.get_display_name()}',
+#                 request=request
+#             )
+            
+#             messages.success(request, 'Dokumen berhasil dihapus!')
+            
+#     except Exception as e:
+#         logger.error(f"Error deleting document: {str(e)}")
+#         messages.error(request, f'Gagal menghapus dokumen: {str(e)}')
+    
+#     return redirect('archive:document_list')
 
 
 @login_required
 def document_download(request, document_id):
-    return HttpResponse("<h1>Halaman ini masih dalam pengembangan 🚧</h1>")
+    """Download document file"""
+    document = get_object_or_404(Document, id=document_id, is_deleted=False)
+    
+    try:
+        # Log download activity
+        log_activity(
+            document=document,
+            user=request.user,
+            action_type='download',
+            description=f'Dokumen diunduh: {document.get_display_name()}',
+            request=request
+        )
+        
+        # Return file
+        response = FileResponse(
+            document.file.open('rb'),
+            content_type='application/pdf'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{document.file.name.split("/")[-1]}"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error downloading document: {str(e)}")
+        raise Http404("File tidak ditemukan")
 
 
 @login_required
 def document_preview(request, document_id):
-    return HttpResponse("<h1>Halaman ini masih dalam pengembangan 🚧</h1>")
+    """Preview document in browser"""
+    document = get_object_or_404(Document, id=document_id, is_deleted=False)
+    
+    try:
+        # Log view activity (if not already logged recently)
+        from datetime import timedelta
+        recent_view = DocumentActivity.objects.filter(
+            document=document,
+            user=request.user,
+            action_type='view',
+            created_at__gte=timezone.now() - timedelta(minutes=5)
+        ).exists()
+        
+        if not recent_view:
+            log_activity(
+                document=document,
+                user=request.user,
+                action_type='view',
+                request=request
+            )
+        
+        # Return file for inline viewing
+        response = FileResponse(
+            document.file.open('rb'),
+            content_type='application/pdf'
+        )
+        response['Content-Disposition'] = f'inline; filename="{document.file.name.split("/")[-1]}"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error previewing document: {str(e)}")
+        raise Http404("File tidak ditemukan")
+
+
+@login_required
+def category_documents(request, category_slug):
+    """List documents by category"""
+    category = get_object_or_404(DocumentCategory, slug=category_slug)
+    
+    # Get documents from this category and its children
+    if category.parent:
+        # Subcategory - get only from this category
+        documents = Document.objects.filter(
+            category=category,
+            is_deleted=False
+        )
+    else:
+        # Parent category - get from all children
+        documents = Document.objects.filter(
+            Q(category=category) | Q(category__parent=category),
+            is_deleted=False
+        )
+    
+    documents = documents.select_related('category', 'created_by').order_by('-document_date')
+    
+    # Pagination
+    paginator = Paginator(documents, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Categories for sidebar
+    categories = DocumentCategory.objects.filter(
+        parent__isnull=True
+    ).prefetch_related('children')
+    
+    context = {
+        'page_obj': page_obj,
+        'categories': categories,
+        'current_category': category,
+        'total_results': documents.count(),
+    }
+    
+    return render(request, 'archive/document_list.html', context)
+
+
+@login_required
+def search_documents(request):
+    """Search documents via AJAX"""
+    query = request.GET.get('q', '')
+    
+    if len(query) < 3:
+        return JsonResponse({'results': []})
+    
+    documents = Document.objects.filter(
+        Q(spd_info__employee__name__icontains=query) |
+        Q(spd_info__destination__icontains=query) |
+        Q(category__name__icontains=query),
+        is_deleted=False
+    ).select_related('category', 'created_by').prefetch_related('spd_info__employee')[:10]
+    
+    results = []
+    for doc in documents:
+        result = {
+            'id': doc.id, # type: ignore
+            'title': doc.get_display_name(),
+            'category': doc.category.name,
+            'date': doc.document_date.strftime('%d/%m/%Y'),
+            'url': f'/archive/documents/{doc.id}/', # type: ignore
+        }
+        
+        # Add SPD specific info
+        try:
+            spd = doc.spd_info # type: ignore
+            result['employee'] = spd.employee.name
+            result['destination'] = spd.get_destination_display_full()
+        except:
+            pass
+        
+        results.append(result)
+    
+    return JsonResponse({'results': results})
 
 
 # ==================== API VIEWS (REST Framework) ====================

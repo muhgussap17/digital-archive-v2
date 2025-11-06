@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Search form -->
-            <form class="navbar-search navbar-search-light form-inline mr-sm-3" id="navbar-search-main" action="{% url 'archive:search_documents' %}" method="GET">
+            <form class="navbar-search navbar-search-light form-inline mr-sm-3" id="navbar-search-main" action="{% url 'archive:document_search' %}" method="GET">
                 <div class="form-group mb-0">
                     <div class="input-group input-group-alternative input-group-merge">
                         <div class="input-group-prepend">
@@ -162,7 +162,7 @@ $(document).ready(function() {
         
         searchTimeout = setTimeout(function() {
             $.ajax({
-                url: '{% url "archive:search_documents" %}',
+                url: '{% url "archive:document_search" %}',
                 data: { q: query },
                 success: function(data) {
                     const results = data.results;

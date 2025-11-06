@@ -1,0 +1,51 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ] # Trigger saat push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11' # Sesuaikan dengan versi Anda
+
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+
+    # (Opsional tapi direkomendasikan)
+    - name: Run Linter
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+    - name: Run Tests
+      run: |
+        # Asumsikan settings_test.py ada untuk tes
+        # python manage.py test --settings=config.settings_test 
+        echo "Testing not implemented yet"
+
+    - name: Deploy to Server (via SSH)
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}     # IP Server
+        username: ${{ secrets.SERVER_USER }} # Username (misal: 'root' atau 'ubuntu')
+        key: ${{ secrets.SERVER_SSH_KEY }}   # SSH Private Key
+        script: |
+          cd /path/to/your/project/ # (e.g., /var/www/arsip-digital)
+          git pull origin main
+          
+          # Masuk ke virtual environment
+          source venv/bin/activate 
+          
+          pip install -r requirements.txt
+          python manage.py collectstatic --noinput
+          python manage.py migrate
+          
+          # Restart Gunicorn service
+          sudo systemctl restart gunicorn_arsip

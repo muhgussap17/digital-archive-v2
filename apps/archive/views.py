@@ -585,7 +585,7 @@ def spd_update(request, pk):
         
         return redirect('archive:document_list')
     
-    spd = document.spd_info
+    spd = document.spd_info # type: ignore
     
     if request.method == 'POST':
         # Use UPDATE form (no file field)

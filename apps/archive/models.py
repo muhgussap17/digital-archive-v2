@@ -27,8 +27,6 @@ class DocumentCategory(models.Model):
         ordering = ['name']
     
     def __str__(self):
-        if self.parent:
-            return self.name
         return self.name
     
     def save(self, *args, **kwargs):
@@ -41,6 +39,36 @@ class DocumentCategory(models.Model):
         if self.parent:
             return f"{self.parent.get_full_path()}/{self.slug}"
         return self.slug
+    
+    def get_total_documents(self):
+        """
+        Get total documents count including children categories
+        """
+        
+        # Get documents from this category
+        count = self.documents.filter(is_deleted=False).count() # type: ignore
+        
+        # Add documents from children categories
+        if self.children.exists(): # type: ignore
+            for child in self.children.all(): # type: ignore
+                count += child.documents.filter(is_deleted=False).count()
+        
+        return count
+    
+    def get_active_documents(self):
+        """
+        Get queryset of active documents including from children
+        """
+        
+        # Build Q object for this category and all children
+        category_ids = [self.id] # type: ignore
+        if self.children.exists(): # type: ignore
+            category_ids.extend(self.children.values_list('id', flat=True)) # type: ignore
+        
+        return Document.objects.filter(
+            category_id__in=category_ids,
+            is_deleted=False
+        )
 
 
 class Employee(models.Model):
@@ -70,12 +98,33 @@ def document_upload_path(instance, filename):
     year = date.strftime('%Y')
     month = date.strftime('%m-%B')
     
-    # Clean filename
-    name, ext = os.path.splitext(filename)
-    clean_name = slugify(name)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # Get original extension
+    _, ext = os.path.splitext(filename)
+    if not ext:
+        ext = '.pdf'
+
+    # Generate filename based on category
+    if instance.category.slug == 'spd' or (instance.category.parent and instance.category.parent.slug == 'spd'):
+        # SPD: Tunggu spd_info, untuk sementara pakai format umum
+        # Akan di-rename setelah SPDDocument created
+        date_str = date.strftime('%Y-%m-%d')
+        timestamp = datetime.now().strftime('%H%M%S')
+        new_filename = f"SPD_{date_str}_{timestamp}{ext}"
+    else:
+        # Belanjaan: Subcategory_YYYY-MM-DD.pdf
+        category_name = instance.category.name.replace(' ', '')
+        date_str = date.strftime('%Y-%m-%d')
+        
+        # PRESERVE CASE: Don't use slugify, just remove spaces and special chars
+        # Keep original capitalization
+        import re
+        clean_name = re.sub(r'[^\w\s-]', '', category_name)
+        clean_name = re.sub(r'[-\s]+', '', clean_name)
+        
+        new_filename = f"{clean_name}_{date_str}{ext}"
     
-    return f"uploads/{category_path}/{year}/{month}/{clean_name}_{timestamp}{ext}"
+    # Build full path
+    return f"uploads/{category_path}/{year}/{month}/{new_filename}"
 
 
 class Document(models.Model):

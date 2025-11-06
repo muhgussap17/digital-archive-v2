@@ -21,10 +21,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.accounts.decorators import staff_required
 from apps.accounts.permissions import IsStaffOrReadOnly
 
-from .models import Document, DocumentCategory, SPDDocument, DocumentActivity, Employee
-from .forms import DocumentFilterForm, DocumentForm, SPDDocumentForm, EmployeeForm
-from .serializers import DocumentSerializer, CategorySerializer, SPDSerializer
-from .utils import log_activity, rename_document_file, get_client_ip
+from ..models import Document, DocumentCategory, SPDDocument, DocumentActivity, Employee
+from ..forms import DocumentFilterForm, DocumentForm, SPDDocumentForm, EmployeeForm
+from ..serializers import DocumentSerializer, CategorySerializer, SPDSerializer
+from ..utils import log_activity, rename_document_file, get_client_ip
 import logging
 
 logger = logging.getLogger(__name__)
@@ -765,7 +765,7 @@ def document_upload(request):
     Menangani upload dokumen belanjaan (non-SPD) via AJAX modal.
     HANYA UNTUK STAFF.
     """
-    form = DocumentUploadForm(request.POST, request.FILES)
+    form = DocumentUploadForm(request.POST, request.FILES) # type: ignore
 
     if form.is_valid():
         try:

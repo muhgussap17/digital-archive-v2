@@ -1,7 +1,9 @@
 import os
+import re
 from django.conf import settings
 from django.utils.text import slugify
 from .models import DocumentActivity
+from datetime import datetime
 
 
 def get_client_ip(request):
@@ -57,13 +59,18 @@ def generate_spd_filename(spd_document):
     """
     document = spd_document.document
     
-    # Clean employee name (remove spaces, special chars)
-    employee_name = slugify(spd_document.employee.name.replace(' ', ''))
+    # Clean employee name - PRESERVE CASE, only remove spaces & special chars
+    employee_name = spd_document.employee.name
+    # Remove special characters but keep spaces
+    employee_name = re.sub(r'[^\w\s-]', '', employee_name)
+    # Remove spaces (join words without separator)
+    employee_name = re.sub(r'\s+', '', employee_name)
     
     # Clean destination
     destination = spd_document.get_destination_display_full()
-    destination_clean = slugify(destination.replace(' ', ''))
-    
+    destination_clean = re.sub(r'[^\w\s-]', '', destination)
+    destination_clean = re.sub(r'\s+', '', destination_clean)
+
     # Date in YYYY-MM-DD format
     date_str = document.document_date.strftime('%Y-%m-%d')
     
@@ -86,46 +93,70 @@ def generate_belanjaan_filename(document):
     """
     # Get subcategory name
     category = document.category
-    subcategory_name = category.name if category.parent else category.slug
+    category_name = category.name if category.parent else category.slug
     
-    # Clean subcategory name
-    subcategory_clean = slugify(subcategory_name).replace('-', '')
+    # Clean category name - PRESERVE CASE
+    category_clean = re.sub(r'[^\w\s-]', '', category_name)
+    category_clean = re.sub(r'\s+', '', category_clean)
     
     # Date in YYYY-MM-DD format
     date_str = document.document_date.strftime('%Y-%m-%d')
     
     # Construct filename
-    filename = f"{subcategory_clean}_{date_str}.pdf"
+    filename = f"{category_clean}_{date_str}.pdf"
     
     return filename
 
 
-def get_unique_filename(directory, filename):
-    """
-    Generate unique filename if file already exists
-    Adds suffix _1, _2, etc.
+# def get_unique_filename(directory, filename):
+#     """
+#     Generate unique filename if file already exists
+#     Adds suffix _1, _2, etc.
     
-    Args:
-        directory: Directory path
-        filename: Base filename
+#     Args:
+#         directory: Directory path
+#         filename: Base filename
         
-    Returns:
-        str: Unique filename
+#     Returns:
+#         str: Unique filename
+#     """
+#     full_path = os.path.join(directory, filename)
+    
+#     if not os.path.exists(full_path):
+#         return filename
+    
+#     name, ext = os.path.splitext(filename)
+#     counter = 1
+    
+#     while True:
+#         new_filename = f"{name}_{counter}{ext}"
+#         new_path = os.path.join(directory, new_filename)
+        
+#         if not os.path.exists(new_path):
+#             return new_filename
+        
+#         counter += 1
+
+
+def get_unique_filepath(filepath):
     """
-    full_path = os.path.join(directory, filename)
+    Generate unique filepath if file already exists
+    Adds suffix _1, _2, etc.
+    """
+    if not os.path.exists(filepath):
+        return filepath
     
-    if not os.path.exists(full_path):
-        return filename
-    
+    directory = os.path.dirname(filepath)
+    filename = os.path.basename(filepath)
     name, ext = os.path.splitext(filename)
     counter = 1
     
     while True:
         new_filename = f"{name}_{counter}{ext}"
-        new_path = os.path.join(directory, new_filename)
+        new_filepath = os.path.join(directory, new_filename)
         
-        if not os.path.exists(new_path):
-            return new_filename
+        if not os.path.exists(new_filepath):
+            return new_filepath
         
         counter += 1
 
@@ -144,51 +175,54 @@ def rename_document_file(document, new_filename=None):
     if not document.file:
         return None
     
-    old_path = document.file.path
+    category = document.category
     
-    # Generate filename based on category
-    if not new_filename:
-        category = document.category
-        
-        # Check if SPD
-        if category.slug == 'spd' or (category.parent and category.parent.slug == 'spd'):
-            try:
-                spd_info = document.spd_info
+    # Only rename SPD (after spd_info is available)
+    if category.slug == 'spd' or (category.parent and category.parent.slug == 'spd'):
+        try:
+            spd_info = document.spd_info
+            
+            # Generate new filename with employee name
+            if not new_filename:
                 new_filename = generate_spd_filename(spd_info)
-            except:
-                # Fallback if SPD info not available
-                date_str = document.document_date.strftime('%Y-%m-%d')
-                new_filename = f"SPD_{date_str}_{document.id}.pdf"
-        else:
-            # Belanjaan
-            new_filename = generate_belanjaan_filename(document)
+            
+            old_path = document.file.path
+            
+            # Build new path (same directory, different name)
+            directory = os.path.dirname(old_path)
+            new_path = os.path.join(directory, new_filename)
+            
+            # Rename physical file if different
+            if old_path != new_path and os.path.exists(old_path):
+                # Ensure unique filename
+                new_path = get_unique_filepath(new_path)
+                new_filename = os.path.basename(new_path)
+                
+                os.rename(old_path, new_path)
+                
+                # Update database with new filename
+                year = document.document_date.strftime('%Y')
+                month = document.document_date.strftime('%m-%B')
+                category_path = document.category.get_full_path()
+                
+                new_relative_path = os.path.join(
+                    'uploads',
+                    category_path,
+                    year,
+                    month,
+                    new_filename
+                )
+                
+                document.file.name = new_relative_path
+                document.save(update_fields=['file'])
+                
+                return new_relative_path
+        except:
+            # SPD info not available yet, skip rename
+            pass
     
-    # Build new path
-    year = document.document_date.strftime('%Y')
-    month = document.document_date.strftime('%m-%B')
-    category_path = document.category.get_full_path()
-    
-    new_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', category_path, year, month)
-    
-    # Bikin folder kalo belum ada
-    os.makedirs(new_dir, exist_ok=True)
-    
-    # Pastikan nama file unik
-    new_filename = get_unique_filename(new_dir, new_filename)
-    
-    new_path = os.path.join(new_dir, new_filename)
-    
-    # Rename physical file
-    if os.path.exists(old_path):
-        os.rename(old_path, new_path)
-    
-    # Update database
-    new_relative_path = os.path.join('uploads', category_path, year, month, new_filename)
-    
-    document.file.name = new_relative_path
-    document.save(update_fields=['file'])
-    
-    return new_relative_path
+    # For Belanjaan, do nothing (already named correctly by upload_path)
+    return None
 
 
 def format_file_size(size_bytes):

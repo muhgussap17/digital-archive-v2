@@ -68,14 +68,14 @@ def get_badge_class(category_slug, badge_type='pill'):
     
     Usage: {% get_badge_class document.category.slug 'pill' %}
     """
-    color = 'warning' if category_slug == 'spd' else 'success'
+    color = 'warning' if category_slug == 'spd' else 'success' # Jika 'spd' maka warning, selainnya success
     
     if badge_type == 'pill':
         return f'badge badge-pill badge-{color}'
     elif badge_type == 'dot':
         return f'badge badge-dot bg-{color}'
     else:
-        return f'badge badge-{color}'
+        return f'badge badge-{color}' # Default badge
 
 
 @register.simple_tag

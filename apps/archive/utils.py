@@ -224,6 +224,102 @@ def rename_document_file(document, new_filename=None):
     # For Belanjaan, do nothing (already named correctly by upload_path)
     return None
 
+def move_document_file(document, old_category=None, old_date=None):
+    """
+    Move and rename file when metadata (category/date) changes
+    
+    Args:
+        document: Document instance with NEW metadata
+        old_category: Previous category (if changed)
+        old_date: Previous date (if changed)
+    
+    Returns:
+        str: New file path or None
+    """
+    if not document.file:
+        return None
+    
+    try:
+        old_path = document.file.path
+        
+        if not os.path.exists(old_path):
+            return None
+        
+        # Generate new path based on current metadata
+        category_path = document.category.get_full_path()
+        date = document.document_date
+        year = date.strftime('%Y')
+        month = date.strftime('%m-%B') # 01-January format
+        
+        # Generate new filename
+        if document.category.slug == 'spd' or (document.category.parent and document.category.parent.slug == 'spd'):
+            try:
+                spd_info = document.spd_info
+                new_filename = generate_spd_filename(spd_info)
+            except:
+                # SPD info not available, use generic
+                date_str = date.strftime('%Y-%m-%d')
+                new_filename = f"SPD_{date_str}_{document.id}.pdf"
+        else:
+            new_filename = generate_belanjaan_filename(document)
+        
+        # Build new directory path
+        new_dir = os.path.join(
+            settings.MEDIA_ROOT,
+            'uploads',
+            category_path,
+            year,
+            month
+        )
+        
+        # Create directory if not exists
+        os.makedirs(new_dir, exist_ok=True)
+        
+        # Build new full path
+        new_path = os.path.join(new_dir, new_filename)
+        
+        # Ensure unique filename
+        new_path = get_unique_filepath(new_path)
+        new_filename = os.path.basename(new_path)
+        
+        # Move file (not copy) if path different
+        if old_path != new_path:
+            import shutil
+
+            shutil.move(old_path, new_path)
+            
+            # Clean up empty old directories (optional)
+            try:
+                old_dir = os.path.dirname(old_path)
+                if not os.listdir(old_dir):  # If directory empty
+                    os.rmdir(old_dir)
+                    # Try to remove parent directories if empty
+                    parent_dir = os.path.dirname(old_dir)
+                    if not os.listdir(parent_dir):
+                        os.rmdir(parent_dir)
+            except:
+                pass  # Ignore cleanup errors
+            
+            # Update database with new path
+            new_relative_path = os.path.join(
+                'uploads',
+                category_path,
+                year,
+                month,
+                new_filename
+            )
+            
+            document.file.name = new_relative_path
+            document.save(update_fields=['file'])
+            
+            return new_relative_path
+        
+        return None
+        
+    except Exception as e:
+        # Log error but don't fail the update
+        print(f"Error moving file: {e}")
+        return None
 
 def format_file_size(size_bytes):
     """
@@ -271,3 +367,11 @@ def validate_pdf_file(file):
         return False, "File bukan PDF yang valid"
     
     return True, None
+
+def update_document_file_path(document):
+    """
+    Wrapper function untuk dipanggil di views setelah update
+    Deteksi apakah perlu move file
+    """
+    # Always try to move/rename to ensure correct path
+    return move_document_file(document)

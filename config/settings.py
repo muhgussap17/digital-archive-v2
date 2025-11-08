@@ -7,13 +7,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Security settings
-SECRET_KEY = 'django-insecure-wgxx_^)y*-ify02$(%-p4#@n4+udqng!#n=i^4hm31g$kf0xys'
-# SECRET_KEY = config('SECRET_KEY') # untuk production, ambil dari environment variable
-DEBUG = True
-# DEBUG = config('DEBUG', default=False, cast=bool) # untuk production, ambil dari environment variable
-ALLOWED_HOSTS = []
-# ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',') # type: ignore # untuk production, ambil dari environment variable
-
+# SECRET_KEY = 'django-insecure-wgxx_^)y*-ify02$(%-p4#@n4+udqng!#n=i^4hm31g$kf0xys'
+SECRET_KEY = config('SECRET_KEY') # untuk production, ambil dari environment variable
+# DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool) # untuk production, ambil dari environment variable
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',') # type: ignore # untuk production, ambil dari environment variable
 
 # Application definition
 INSTALLED_APPS = [
@@ -34,6 +33,8 @@ INSTALLED_APPS = [
     'apps.archive',
     'apps.accounts',
 
+    'debug_toolbar',
+
     # Apps v3
     # 'documents',
     # 'widget_tweaks',
@@ -42,14 +43,17 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # Tambahan corsheaders
+    'corsheaders.middleware.CorsMiddleware', # Corsheaders
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware', 
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.archive.middleware.AuditLogMiddleware', # Custom middleware for audit logging
+    'apps.archive.middleware.AuditLogMiddleware', # Custom middleware untuk audit logging
 ]
+
+INTERNAL_IPS = ['127.0.0.1']
 
 ROOT_URLCONF = 'config.urls'
 

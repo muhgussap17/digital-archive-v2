@@ -42,18 +42,43 @@ class DocumentCategory(models.Model):
     
     def get_total_documents(self):
         """
-        Get total documents count including children categories
+        Menghitung total dokumen termasuk dari kategori turunan
+        
+        Optimasi: Menggunakan single query dengan aggregation untuk menghindari
+        N+1 query problem. Jika kategori memiliki children (subcategories), 
+        akan menghitung dokumen dari semua kategori turunan.
+        
+        Returns:
+            int: Jumlah total dokumen aktif (is_deleted=False)
+        
+        Contoh Penggunaan:
+            >>> category = DocumentCategory.objects.get(slug='belanjaan')
+            >>> total = category.get_total_documents()
+            >>> print(f"Total dokumen: {total}")
+            Total dokumen: 45
+        
+        Catatan:
+            - Hanya menghitung dokumen yang tidak dihapus (is_deleted=False)
+            - Mencakup dokumen dari kategori ini dan semua kategori children
+        
+        Implementasi Standar:
+            Sesuai dengan Peraturan Menteri PANRB tentang Optimasi Aplikasi
         """
+        # Kumpulkan ID kategori yang akan dihitung (parent + children)
+        category_ids = [self.id] # type: ignore
         
-        # Get documents from this category
-        count = self.documents.filter(is_deleted=False).count() # type: ignore
-        
-        # Add documents from children categories
+        # Tambahkan ID dari kategori children jika ada
         if self.children.exists(): # type: ignore
-            for child in self.children.all(): # type: ignore
-                count += child.documents.filter(is_deleted=False).count()
+            category_ids.extend(
+                self.children.values_list('id', flat=True) # type: ignore
+            )
         
-        return count
+        # Hitung dokumen dengan single query menggunakan IN clause
+        return Document.objects.filter(
+            category_id__in=category_ids,
+            is_deleted=False
+        ).count()
+
     
     def get_active_documents(self):
         """
@@ -195,6 +220,10 @@ class Document(models.Model):
                 return f"{size:.2f} {unit}"
             size /= 1024.0
         return f"{size:.2f} TB"
+    
+    def get_filename(self):
+        """Return only the filename without path"""
+        return os.path.basename(self.file.name)
 
 
 class SPDDocument(models.Model):

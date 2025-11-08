@@ -26,14 +26,14 @@
             <div class="card-header border-0 bg-transparent">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h3 class="mb-0">
+                        <h3 class="mb-0 d-inline-flex align-items-center">
                             {% if current_category %}
                                 Dokumen {{ current_category.name }}
                             {% else %}
                                 Semua Dokumen
                             {% endif %}
+                        <span class="badge badge-default badge-pill ml-2">{{ total_results }}</span>
                         </h3>
-                        <p class="text-sm text-muted mb-0">Total: {{ total_results }} dokumen</p>
                     </div>
                     <div class="col-auto">
                         <div class="btn-group" role="group">
@@ -56,12 +56,12 @@
                     <!-- Table Head -->
                     <thead class="thead-light">
                         <tr>
-                            <th scope="col">Dokumen</th>
+                            <th scope="col">Nama</th>
                             <!-- <th scope="col">Kategori</th> -->
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">Ukuran</th>
-                            <th scope="col">Diupload</th>
-                            <th scope="col" class="text-right">Aksi</th>
+                            <th scope="col">Diunggah oleh</th>
+                            <th scope="col">Tanggal diunggah</th>
+                            <th scope="col">Ukuran file</th>
+                            <th scope="col" class="text-right"></th>
                         </tr>
                     </thead>
 
@@ -69,61 +69,75 @@
                     <tbody class="list">
                         {% for document in page_obj %}
                         <tr class="document-row" data-document-id="{{ document.id }}">
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="{% get_icon_class document.category.slug %} mr-3">
-                                        <i class="fa-solid {{ document.category.icon }}"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0 text-sm">
-                                            {{ document.get_display_name }}
-                                        </h6>
-                                        <small class="text-muted">
-                                            <i class="fa-solid fa-file-pdf text-danger"></i> 
-                                            {{ document.file.name|split:'/'|last }}
-                                        </small>
-                                        {% if document.spd_info %}
-                                        <br>
-                                        <small class="text-muted">
-                                            <i class="fa-solid fa-user"></i> {{ document.spd_info.employee.name }}
-                                            •
-                                            <i class="fa-solid fa-location-dot"></i> {{ document.spd_info.get_destination_display_full }}
-                                        </small>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                            <td class="font-weight-bold">
+                                <i class="fa-solid fa-file-pdf fa-lg text-danger mr-2"></i> 
+                                {{ document.get_filename }}
                             </td>
                             <!-- <td class="category">
                                 <span class="{% get_badge_class document.category.slug 'pill' %}">
                                     {{ document.category.name }}
                                 </span>
                             </td> -->
+                            <td class="uploader">
+                                {{ document.created_by.username|truncate_chars:20 }}
+                            </td>
                             <td class="date">
-                                <span class="text-sm">{{ document.document_date|indo_date }}</span><br>
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-clock"></i> {{ document.created_at|time_since }}
-                                </small>
+                                {{ document.created_at|indo_date }}<br>
+                                {% if document.updated_at and document.updated_at|date:"U" > document.created_at|date:"U" %}
+                                    <small class="text-danger">
+                                        Dimodifikasi: {{ document.updated_at|indo_date:'datetime' }}
+                                    </small>
+                                {% endif %}
                             </td>
                             <td class="size">
                                 <span class="badge badge-default">
                                     {{ document.file_size|file_size }}
                                 </span>
                             </td>
-                            <td class="uploader">
-                                <div class="avatar-group">
-                                    <span class="avatar avatar-sm rounded-circle bg-default" 
-                                          data-toggle="tooltip" 
-                                          title="{{ document.created_by.full_name }}">
-                                        <i class="fa-solid fa-user text-white"></i>
-                                    </span>
-                                </div>
-                                <small class="d-block text-muted text-sm mt-1">
-                                    {{ document.created_by.full_name|truncate_chars:20 }}
-                                </small>
-                            </td>
                             <td class="text-right">
-                                <div class="btn-group btn-group-sm" role="group">
+                                <a href="#" class="btn btn-outline-secondary text-default btn-sm mr-0" data-toggle="dropdown" title="More" ><i class="fa-solid fa-ellipsis-vertical"></i></a>
+                                <div class="dropdown-menu">
+                                    <!-- Download -->
+                                    <a href="{% url 'archive:document_download' document.id %}" class="dropdown-item text-default" target="_blank" data-toggle="tooltip">
+                                        <i class="fa-solid fa-download"></i>
+                                        <span>Download</span>
+                                    </a>
+                                    <!-- Edit (Staff Only) -->
+                                    <a class="dropdown-item text-default"
+                                        {% if document.spd_info %}
+                                        data-action="edit-spd"
+                                        {% else %}
+                                        data-action="edit-document"
+                                        {% endif %}
+                                        data-document-id="{{ document.id }}"
+                                        data-toggle="tooltip">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span>Edit</span>
+                                    </a>
                                     <!-- Preview -->
+                                    <a href="{% url 'archive:document_preview' document.id %}" class="dropdown-item text-default" target="_blank" data-toggle="tooltip">
+                                        <i class="fa-solid fa-eye"></i>
+                                        <span>Preview</span>
+                                    </a>
+                                    <hr class="m-1">
+                                    <a href="#" class="dropdown-item text-default">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        <span>Detail</span>
+                                    </a>
+                                    <hr class="m-1">
+                                    <!-- Delete (Staff Only) -->
+                                    <a class="dropdown-item text-default"
+                                        class="btn btn-danger"
+                                        data-action="delete-document"
+                                        data-document-id="{{ document.id }}"
+                                        data-document-name="{{ document.get_display_name }}"
+                                        data-document-type="{% if document.spd_info %}spd{% else %}document{% endif %}"
+                                        data-toggle="tooltip">
+                                        <i class="fa-solid fa-trash"></i>
+                                        <span>Delete</span>
+                                    </a>
+                                </div>
+                                <!-- <div class="btn-group btn-group-sm" role="group">
                                     <a href="{% url 'archive:document_preview' document.id %}" 
                                        class="btn btn-secondary" 
                                        target="_blank"
@@ -132,7 +146,6 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
-                                    <!-- Download -->
                                     <a href="{% url 'archive:document_download' document.id %}" 
                                        class="btn btn-success"
                                        data-toggle="tooltip" 
@@ -140,7 +153,6 @@
                                         <i class="fa-solid fa-download"></i>
                                     </a>
 
-                                    <!-- Edit (Staff Only) -->
                                     {% if request.user.is_staff %}
                                         <button type="button"
                                            class="btn btn-warning"
@@ -155,7 +167,6 @@
                                             <i class="fa-solid fa-edit"></i>
                                         </button>
                                         
-                                        <!-- Delete (Staff Only) -->
                                         <button type="button"
                                            class="btn btn-danger"
                                            data-action="delete-document"
@@ -167,7 +178,7 @@
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     {% endif %}
-                                </div>
+                                </div> -->
                             </td>
                         </tr>
                         {% empty %}
@@ -249,15 +260,15 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip();
     
     // Click row to show detail panel
-    $('.document-row').on('click', function(e) {
-        // Ignore if clicking on buttons
-        if ($(e.target).closest('.btn').length) {
-            return;
-        }
+    // $('.document-row').on('click', function(e) {
+    //     // Ignore if clicking on buttons
+    //     if ($(e.target).closest('.btn').length) {
+    //         return;
+    //     }
         
-        var documentId = $(this).data('document-id');
-        showDetailPanel(documentId);
-    });
+    //     var documentId = $(this).data('document-id');
+    //     showDetailPanel(documentId);
+    // });
     
     // View toggle (future feature)
     $('#viewTable').on('click', function() {

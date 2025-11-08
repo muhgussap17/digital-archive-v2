@@ -4,8 +4,8 @@
 
 {% if is_update %}
     <!-- Info dokumen existing -->
-    <div class="alert alert-info mb-3">
-        <i class="fa-solid fa-circle-info"></i>
+    <div class="alert alert-default mb-3">
+        <i class="fa-solid fa-circle-info mr-2"></i>
         <strong>Edit Mode:</strong> File tidak dapat diganti. Hanya metadata yang dapat diubah.
     </div>
 {% endif %}
@@ -20,7 +20,7 @@
             </label>
             {{ form.category }}
             {% if form.category.errors %}
-                <div class="invalid-feedback d-block">
+                <div class="invalid-feedback">
                     {{ form.category.errors.0 }}
                 </div>
             {% endif %}
@@ -46,7 +46,7 @@
                 </div>
             </div> -->
             {% if form.document_date.errors %}
-                <div class="invalid-feedback d-block">
+                <div class="invalid-feedback">
                     {{ form.document_date.errors.0 }}
                 </div>
             {% endif %}
@@ -61,40 +61,43 @@
     <!-- File Upload -->
     <div class="col-md-12">
         <div class="form-group">
-            <label class="form-control-label" for="{{ form.file.id_for_label }}">
-                {{ form.file.label }}
-                {% if not is_update %}<span class="text-danger">*</span>{% endif %}
-            </label>
-            
             {% if is_update %}
-                <!-- Display existing file info -->
-                <div class="alert alert-light border mb-2">
-                    <i class="fa-solid fa-file-pdf text-danger"></i>
-                    <strong>File saat ini:</strong> {{ document.file.name|split:'/'|last }}
-                    <br>
-                    <small class="text-muted">
-                        Ukuran: {{ document.get_file_size_display }}
-                    </small>
-                </div>
-            {% endif %}
-            
-            <div class="custom-file">
-                {{ form.file }}
-                <label class="custom-file-label" for="{{ form.file.id_for_label }}">
-                    {% if is_update %}File tidak dapat diganti{% else %}Pilih file PDF...{% endif %}
+                <label class="form-control-label" for="customFileLang">
+                    File PDF
                 </label>
-            </div>
-            
-            {% if form.file.errors %}
-                <div class="invalid-feedback d-block">
-                    {{ form.file.errors.0 }}
+
+                <!-- Field dummy nonaktif -->
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="customFileLang" value="" disabled>
+                    <label class="custom-file-label" for="customFileLang">
+                        {{ document.get_filename }}
+                    </label>
                 </div>
-            {% endif %}
-            
-            {% if form.file.help_text %}
-                <small class="form-text text-muted">
-                    {{ form.file.help_text }}
-                </small>
+            {% else %}
+                <label class="form-control-label" for="{{ form.file.id_for_label }}">
+                    {{ form.file.label }}
+                    <span class="text-danger">*</span>
+                </label>
+
+                <!-- Input file aktif -->
+                <div class="custom-file">
+                    {{ form.file }}
+                    <label class="custom-file-label" for="{{ form.file.id_for_label }}">
+                        Pilih file PDF...
+                    </label>
+                </div>
+                
+                {% if form.file.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.file.errors.0 }}
+                    </div>
+                {% endif %}
+                
+                {% if form.file.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.file.help_text }}
+                    </small>
+                {% endif %}
             {% endif %}
         </div>
     </div>

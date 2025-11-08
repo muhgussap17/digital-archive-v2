@@ -147,7 +147,7 @@ Setelah login sebagai superuser:
 3. Isi tanggal dokumen
 4. Upload file PDF
 5. Judul dokumen akan otomatis: `Kategori - DD MMMM YYYY` # Ditangani pada fungsi get_display_name() pada models.py
-6. File akan dinamai: `Kategori_YYYY-MM-DD.pdf` # Ditangani pada
+6. File akan dinamai: `Kategori_YYYY-MM-DD.pdf` # Ditangani pada fungsi rename_document_file utils.py
 
 ### Upload Dokumen SPD
 
@@ -157,7 +157,7 @@ Setelah login sebagai superuser:
 4. Isi tanggal mulai dan selesai
 5. Upload file PDF
 6. Judul dokumen akan otomatis: `SPD - NamaPegawai - Tujuan (DD MMMM YYYY)` # Ditangani pada fungsi get_display_name() pada models.py
-7. File akan dinamai: `SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf`# Ditangani pada 
+7. File akan dinamai: `SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf`# Ditangani pada fungsi rename_document_file utils.py
 
 ## 🔍 Pencarian & Filter
 
@@ -324,14 +324,14 @@ BBM_2024-01-25.pdf
 media/uploads/
 ├── spd/
 │   └── 2024/
-│       ├── 01-January/
+│       ├── 01-Januari/
 │       │   └── SPD_JohnDoe_Jakarta_2024-01-15.pdf
 │       └── 02-February/
 │           └── SPD_JaneSmith_Surabaya_2024-02-05.pdf
 └── belanjaan/
     ├── atk/
     │   └── 2024/
-    │       └── 01-January/
+    │       └── 01-Januari/
     │           └── ATK_2024-01-10.pdf
     ├── konsumsi/
     └── bbm/

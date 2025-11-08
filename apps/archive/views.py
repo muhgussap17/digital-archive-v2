@@ -25,8 +25,14 @@ from apps.accounts.permissions import IsStaffOrReadOnly
 from .models import Document, DocumentCategory, SPDDocument, DocumentActivity, Employee
 from .forms import DocumentFilterForm, DocumentForm, DocumentUpdateForm, SPDDocumentForm, SPDDocumentUpdateForm, EmployeeForm
 from .serializers import DocumentSerializer, CategorySerializer, SPDSerializer
-from .utils import log_activity, rename_document_file, get_client_ip
+from .utils import log_activity, rename_document_file, get_client_ip, move_document_file
 import logging
+
+# Untuk testing
+from django.db import connection
+from django.db import reset_queries
+
+reset_queries()
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +202,7 @@ def document_list(request, category_slug=None):
             documents = documents.filter(spd_info__employee=employee)
 
     # Pagination
-    paginator = Paginator(documents, 20)
+    paginator = Paginator(documents, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -206,6 +212,10 @@ def document_list(request, category_slug=None):
         'filter_form': filter_form,
         'total_results': documents.count(),
     }
+
+    print(f"Total queries: {len(connection.queries)}")
+    for query in connection.queries:
+        print(f"  {query['time']}s: {query['sql'][:100]}")
     
     return render(request, 'archive/document_list.html', context)
 
@@ -213,6 +223,7 @@ def document_list(request, category_slug=None):
 @login_required
 def search_documents(request):
     return HttpResponse("<h1>Halaman ini masih dalam pengembangan 🚧</h1>")
+
 
 # ==================== DOCUMENT CRUD ====================
 
@@ -336,8 +347,8 @@ def document_update(request, pk):
                     updated_document.version += 1
                     updated_document.save()
                     
-                    # Rename file jika kategori atau tanggal berubah
-                    rename_document_file(updated_document)
+                    # Move dan rename file jika kategori atau tanggal berubah
+                    move_document_file(updated_document)
                     
                     # Log activity menggunakan utils
                     log_activity(
@@ -607,8 +618,8 @@ def spd_update(request, pk):
                     spd.end_date = form.cleaned_data['end_date']
                     spd.save()
                     
-                    # Rename file jika ada perubahan metadata
-                    rename_document_file(document)
+                    # Move dan rename file jika ada perubahan metadata
+                    move_document_file(document)
                     
                     # Log activity menggunakan utils
                     log_activity(

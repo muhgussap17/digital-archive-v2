@@ -27,11 +27,16 @@ arsip_digital/
 │   │   │   └── commands/
 │   │   │       ├── backup_documents.py
 │   │   │       └── cleanup_deleted.py
+│   │   ├── templatetags/
+│   │   │   ├── custom_tags.py
+│   │   │   └── date_filters.py
 │   │   └── templates/
 │   │       └── archive/
 │   │           ├── dashboard.html
 │   │           ├── document_list.html
-│   │           ├── components/
+│   │           ├── spd_list.html
+│   │           ├── forms/
+│   │           ├── include/
 │   │           └── modals/
 │   └── accounts/                # User management
 │       ├── __init__.py
@@ -41,16 +46,17 @@ arsip_digital/
 │       ├── urls.py
 │       └── templates/
 │           └── accounts/
-├── static/
-│   ├── argon/                   # Argon theme assets
-│   │   ├── css/
-│   │   ├── js/
-│   │   ├── img/
-│   │   └── vendor/
+├── static/                      # Argon theme assets
 │   ├── css/
+│   │   ├── argon.min.css
+│   │   ├── select2-argon-fix.css
 │   │   └── custom.css
-│   └── js/
-│       └── custom.js
+│   ├── js/
+│   │   ├── argon.min.js
+│   │   ├── modal_handler.js
+│   │   └── custom.js
+│   ├── img/
+│   └── vendor/
 ├── media/
 │   └── uploads/                 # Document storage
 │       ├── spd/

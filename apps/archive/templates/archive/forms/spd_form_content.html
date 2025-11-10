@@ -24,9 +24,6 @@
                     {{ form.document_date.errors.0 }}
                 </div>
             {% endif %}
-            <!-- <small class="form-text text-muted">
-                Tanggal dokumen SPD
-            </small> -->
         </div>
     </div>
 </div>
@@ -45,9 +42,6 @@
                     {{ form.employee.errors.0 }}
                 </div>
             {% endif %}
-            <!-- <small class="form-text text-muted">
-                Pilih pegawai yang melakukan perjalanan dinas
-            </small> -->
         </div>
     </div>
 </div>
@@ -66,9 +60,6 @@
                     {{ form.destination.errors.0 }}
                 </div>
             {% endif %}
-            <!-- <small class="form-text text-muted">
-                Tujuan perjalanan dinas
-            </small> -->
         </div>
     </div>
 </div>
@@ -87,9 +78,6 @@
                     {{ form.destination_other.errors.0 }}
                 </div>
             {% endif %}
-            <!-- <small class="form-text text-muted">
-                Isi jika memilih "Lainnya"
-            </small> -->
         </div>
     </div>
 </div>
@@ -103,13 +91,6 @@
                 <span class="text-danger">*</span>
             </label>
             {{ form.start_date }}
-            <!-- <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </span>
-                </div>
-            </div> -->
             {% if form.start_date.errors %}
                 <div class="invalid-feedback">
                     {{ form.start_date.errors.0 }}
@@ -126,13 +107,6 @@
                 <span class="text-danger">*</span>
             </label>
             {{ form.end_date }}
-            <!-- <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-calendar-xmark"></i>
-                    </span>
-                </div>
-            </div> -->
             {% if form.end_date.errors %}
                 <div class="invalid-feedback">
                     {{ form.end_date.errors.0 }}
@@ -194,58 +168,3 @@
         {{ form.non_field_errors }}
     </div>
 {% endif %}
-
-<script>
-$(document).ready(function() {
-    // Custom file input label update
-    $('.custom-file-input').on('change', function() {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
-    });
-    
-    // Initialize datepicker
-    $('.datepicker').datepicker({
-        format: 'dd/mm/yyyy',
-        autoclose: true,
-        todayHighlight: true,
-        orientation: 'bottom auto',
-        language: 'id'
-    });
-    
-    // Initialize Select2 untuk employee
-    $('#{{ form.employee.id_for_label }}').select2({
-        placeholder: 'Pilih Pegawai',
-        allowClear: false,
-        dropdownParent: $('#SPDModal')
-    });
-    
-    // Initialize Select2 untuk tujuan
-    $('#{{ form.destination.id_for_label }}').select2({
-        placeholder: 'Pilih Tujuan',
-        allowClear: false,
-        dropdownParent: $('#SPDModal')
-    });
-    
-    // Toggle destination_other field
-    function toggleDestinationOther() {
-        var destination = $('#{{ form.destination.id_for_label }}').val();
-        var otherGroup = $('#destination_other_group');
-        var otherField = $('#{{ form.destination_other.id_for_label }}');
-        
-        if (destination === 'other') {
-            otherGroup.show();
-            otherField.prop('required', true);
-        } else {
-            otherGroup.hide();
-            otherField.prop('required', false);
-            otherField.val('');
-        }
-    }
-    
-    // Check on load
-    toggleDestinationOther();
-    
-    // Check on change
-    $('#{{ form.destination.id_for_label }}').on('change', toggleDestinationOther);
-});
-</script>

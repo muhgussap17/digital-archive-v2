@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Daftar Dokumen - Sistem Arsip Digital{% endblock %}
+{% block title %}Dokumen SPD - Sistem Arsip Digital{% endblock %}
 
-{% block page_title %}Daftar Dokumen{% endblock %}
+{% block page_title %}Dokumen Surat Perjalanan Dinas{% endblock %}
 
 {% block breadcrumb %}
-<li class="breadcrumb-item active">Dokumen</li>
+<li class="breadcrumb-item"><a href="{% url 'archive:document_list' %}"></a>Dokumen</li>
+<li class="breadcrumb-item active">SPD</li>
 {% endblock %}
 
 {% block header_actions %}
@@ -49,22 +50,37 @@
             </div>
             
             <!-- Card Body -->
-            {% include 'archive/includes/document_table.html' %}
+            {% include 'archive/includes/spd_table.html' %}
+
         </div>
     </div>
 </div>
 
-<!-- Include Document Filter Modals -->
-{% include 'archive/modals/document_filter_modal.html' %}
+<!-- Include SPD Filter Modals -->
+{% include 'archive/modals/spd_filter_modal.html' %}
 {% endblock %}
 
-<!-- Detail Panel - Soon -->
+<!-- Detail Panel Future -->
+<!-- {% block detail_panel %}
+{% include 'archive/components/detail_panel.html' %}
+{% endblock %} -->
 
 {% block extra_js %}
 <script>
 $(document).ready(function() {
     // Initialize tooltips
     $('[data-toggle="tooltip"]').tooltip();
+    
+    // Click row to show detail panel future
+    $('.document-row').on('click', function(e) {
+        // Ignore if clicking on buttons
+        if ($(e.target).closest('.btn').length) {
+            return;
+        }
+        
+        var documentId = $(this).data('document-id');
+        showDetailPanel(documentId);
+    });
     
     // View toggle (future feature)
     $('#viewTable').on('click', function() {
@@ -82,12 +98,18 @@ $(document).ready(function() {
 
     // Initialize Select2 dan Datepicker saat modal DIBUKA
     $('#filterModal').on('shown.bs.modal', function() {
-        // Initialize Select2 untuk category dropdown
-        $('#{{ filter_form.category.id_for_label }}').select2({
+        // Initialize Select2 untuk employee dropdown
+        $('#{{ filter_form.employee.id_for_label }}').select2({
             allowClear: true,
             dropdownParent: $('#filterModal')  // PENTING: Attach ke modal
         });
-
+        
+        // Initialize Select2 untuk destination dropdown
+        $('#{{ filter_form.destination.id_for_label }}').select2({
+            allowClear: true,
+            dropdownParent: $('#filterModal')  // PENTING: Attach ke modal
+        });
+        
         // Initialize Datepicker
         $('.datepicker').datepicker({
             format: 'dd/mm/yyyy',
@@ -102,8 +124,6 @@ $(document).ready(function() {
     $('#filterModal').on('hidden.bs.modal', function() {
         $('#{{ filter_form.employee.id_for_label }}').select2('destroy');
     });
-});
-</script>
 });
 </script>
 {% endblock %}

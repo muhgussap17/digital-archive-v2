@@ -45,16 +45,6 @@
                     </a>
                 </li>
                 
-                <!-- Filter Button -->
-                <!-- <li class="nav-item dropdown">
-                    <a class="nav-link btn btn-icon-only rounded-circle btn-secondary text-default" href="#" role="button" data-toggle="modal" data-target="#filterModal"
-                    style="display: inline-flex; align-items: center; justify-content: center;">
-                        <span class="btn-inner--icon">
-                            <i class="fa-solid fa-filter"></i>
-                        </span>
-                    </a>
-                </li> -->
-                
                 <!-- Notifications -->
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -140,74 +130,3 @@
         </div>
     </div>
 </div>
-
-<script>
-// Search Functionality with AJAX
-// Error Logs:
-// (index):280 Uncaught ReferenceError: $ is not defined
-//     at (index):280:1
-// (anonymous) @ (index):280
-
-$(document).ready(function() {
-    let searchTimeout;
-    
-    $('#searchInput').on('keyup', function() {
-        clearTimeout(searchTimeout);
-        const query = $(this).val();
-        
-        if (query.length < 3) {
-            $('#searchResults').hide();
-            return;
-        }
-        
-        searchTimeout = setTimeout(function() {
-            $.ajax({
-                url: '{% url "archive:document_search" %}',
-                data: { q: query },
-                success: function(data) {
-                    const results = data.results;
-                    const $resultsList = $('#searchResultsList');
-                    $resultsList.empty();
-                    
-                    if (results.length === 0) {
-                        $resultsList.append(
-                            '<div class="list-group-item">' +
-                            '<small class="text-muted">Tidak ada hasil ditemukan</small>' +
-                            '</div>'
-                        );
-                    } else {
-                        results.forEach(function(doc) {
-                            let subtitle = doc.category;
-                            if (doc.employee) {
-                                subtitle += ' • ' + doc.employee;
-                            }
-                            if (doc.destination) {
-                                subtitle += ' → ' + doc.destination;
-                            }
-                            
-                            $resultsList.append(
-                                '<a href="' + doc.url + '" class="list-group-item list-group-item-action">' +
-                                '<div class="d-flex w-100 justify-content-between">' +
-                                '<h6 class="mb-1">' + doc.title + '</h6>' +
-                                '<small class="text-muted">' + doc.date + '</small>' +
-                                '</div>' +
-                                '<small class="text-muted">' + subtitle + '</small>' +
-                                '</a>'
-                            );
-                        });
-                    }
-                    
-                    $('#searchResults').show();
-                }
-            });
-        }, 500);
-    });
-    
-    // Hide search results when clicking outside
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#navbar-search-main, #searchResults').length) {
-            $('#searchResults').hide();
-        }
-    });
-});
-</script>

@@ -109,30 +109,3 @@
         {{ form.non_field_errors }}
     </div>
 {% endif %}
-
-<script>
-// Script untuk update label custom file input
-$(document).ready(function() {
-    // Custom file input label update
-    $('.custom-file-input').on('change', function() {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
-    });
-    
-    // Initialize datepicker
-    $('.datepicker').datepicker({
-        format: 'dd/mm/yyyy',
-        autoclose: true,
-        todayHighlight: true,
-        orientation: 'bottom auto',
-        language: 'id'
-    });
-    
-    // Initialize Select2 untuk kategori
-    $('#{{ form.category.id_for_label }}').select2({
-        placeholder: ' Pilih Kategori ',
-        allowClear: false,
-        dropdownParent: $('#documentModal')
-    });
-});
-</script>

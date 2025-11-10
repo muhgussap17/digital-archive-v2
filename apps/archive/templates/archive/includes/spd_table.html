@@ -1,0 +1,106 @@
+{% load static %}
+{% load date_filters %}
+{% load custom_tags %}
+
+<div class="table-responsive">
+    <table class="table align-items-center table-flush" id="documentsTable">
+        <!-- Table Head -->
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Nama</th>
+                <th scope="col">Diunggah oleh</th>
+                <th scope="col">Tanggal diunggah</th>
+                <th scope="col">Ukuran file</th>
+                <th scope="col" class="text-right"></th>
+            </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody class="list">
+            {% for document in page_obj %}
+            <tr class="document-row" data-document-id="{{ document.id }}">
+                <td class="font-weight-bold">
+                    <i class="fa-solid fa-file-pdf fa-lg text-danger mr-2"></i> 
+                    {{ document.get_filename }}
+                </td>
+                <td class="uploader">
+                    {{ document.created_by.username|truncate_chars:20 }}
+                </td>
+                <td class="date">
+                    {{ document.created_at|indo_date }}<br>
+                    {% if document.updated_at and document.updated_at|date:"U" > document.created_at|date:"U" %}
+                        <small class="text-danger">
+                            Dimodifikasi: {{ document.updated_at|indo_date:'datetime' }}
+                        </small>
+                    {% endif %}
+                </td>
+                <td class="size">
+                    <span class="badge badge-default">
+                        {{ document.file_size|file_size }}
+                    </span>
+                </td>
+                <td class="text-right">
+                    <a href="#" class="btn btn-outline-secondary text-default btn-sm mr-0" data-toggle="dropdown" title="More"><i class="fa-solid fa-ellipsis-vertical"></i></a>
+                    {% include "archive/includes/document_actions.html" with document=document has_spd=True %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <div class="text-center py-4">
+                        <i class="fa-solid fa-folder-open fa-4x text-muted mb-3"></i>
+                        <p class="text-sm text-muted mb-4">Belum ada dokumen yang diunggah</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="card-footer border-0 py-3">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-end mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% query_transform request page=page_obj.previous_page_number %}">
+                    <i class="fa-solid fa-angle-left"></i>
+                    <span class="sr-only">Previous</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fa-solid fa-angle-left"></i></span>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% query_transform request page=num %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% query_transform request page=page_obj.next_page_number %}">
+                    <i class="fa-solid fa-angle-right"></i>
+                    <span class="sr-only">Next</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fa-solid fa-angle-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}

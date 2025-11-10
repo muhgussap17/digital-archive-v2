@@ -37,33 +37,6 @@ reset_queries()
 logger = logging.getLogger(__name__)
 
 
-def staff_required(function=None, redirect_url='/accounts/login/'):
-    """
-    Decorator untuk memastikan user adalah staff
-    FIXED VERSION - properly wraps and calls the view function
-    """
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                messages.warning(request, 'Anda harus login terlebih dahulu.')
-                return redirect(redirect_url)
-            
-            if not request.user.is_staff:
-                messages.error(request, 'Anda tidak memiliki akses ke halaman ini.')
-                return redirect('archive:dashboard')
-            
-            # CRITICAL: Actually call the view function and return its response
-            return view_func(request, *args, **kwargs)
-        
-        return _wrapped_view
-    
-    if function:
-        return decorator(function)
-    
-    return decorator
-
-
 # ==================== DASHBOARD VIEWS ====================
 
 # Dashboard old logic
@@ -133,61 +106,158 @@ def dashboard(request):
 
 # List updated logic
 @login_required
+# Halaman umum
 def document_list(request, category_slug=None):
     """
-    List all documents with filters
+    View untuk list dokumen Belanjaan (non-SPD)
+    
+    Fitur:
+        - Filter by category via URL slug
+        - Filter by search, date range via form
+        - Pagination (5 items per page)
+        - Query optimization dengan select_related
     
     Args:
-        category_slug: Optional slug untuk filter by category via URL
+        request: HttpRequest object
+        category_slug: Optional slug untuk filter by category
     
-    Features:
-        - URL-based category filter (dari sidebar)
-        - Form-based filters (search, date range, employee)
-        - Pagination
-        - Support parent + children categories
+    Returns:
+        Rendered template dengan context
     """
-    documents = Document.objects.filter(is_deleted=False).select_related(
-        'category', 'created_by'
-    ).prefetch_related('spd_info__employee').order_by('-document_date', '-created_at')
+
+    # Testing
+    reset_queries()
+
+    documents = (
+        Document.objects
+        .filter(is_deleted=False)
+        .select_related('category', 'category__parent', 'created_by')
+        .order_by('-document_date', '-created_at')
+    )
 
     current_category = None
 
-    # Filter by category if slug provided (dari sidebar click)
-    if category_slug: # type: ignore
-        current_category = get_object_or_404(DocumentCategory, slug=category_slug) # type: ignore
-        
-        # Get documents from this category and all its children
+    # Filter by category dari URL
+    if category_slug:
+        current_category = get_object_or_404(DocumentCategory, slug=category_slug)
         category_ids = [current_category.id] # type: ignore
+
+        # Include children categories
         if current_category.children.exists(): # type: ignore
-            category_ids.extend(current_category.children.values_list('id', flat=True)) # type: ignore
+            category_ids.extend(
+                current_category.children.values_list('id', flat=True) # type: ignore
+            )
         
         documents = documents.filter(category_id__in=category_ids)
 
-    # Initialize filter form
-    filter_form = DocumentFilterForm(request.GET or None)
-    
-    # Apply filters
+    # Filter form
+    filter_form = DocumentFilterForm(request.GET or None, is_spd=False)
+
+    # Apply filters dari form
     if filter_form.is_valid():
         search = filter_form.cleaned_data.get('search')
         category = filter_form.cleaned_data.get('category')
         date_from = filter_form.cleaned_data.get('date_from')
         date_to = filter_form.cleaned_data.get('date_to')
-        employee = filter_form.cleaned_data.get('employee')
         
         # Search filter
         if search:
             documents = documents.filter(
-                Q(spd_info__employee__name__icontains=search) |
-                Q(spd_info__destination__icontains=search) |
                 Q(category__name__icontains=search) |
                 Q(file__icontains=search)
             )
         
-        # Category filter dari form (jika tidak ada URL category)
-        # Form category filter akan override URL category filter
+        # Category filter dari form (override URL filter jika ada)
         if category:
+            category_ids = [category.id]
+            if category.children.exists():
+                category_ids.extend(
+                    category.children.values_list('id', flat=True)
+                )
+            documents = documents.filter(category_id__in=category_ids)
+        
+        # Date range filter
+        if date_from:
+            documents = documents.filter(document_date__gte=date_from)
+        
+        if date_to:
+            documents = documents.filter(document_date__lte=date_to)
+
+    print(f"Total queries: {len(connection.queries)}")
+    for query in connection.queries:
+        print(f"{query['time']}s: {query['sql'][:100]}")
+
+    context = {
+        'page_obj': Paginator(documents, 5).get_page(request.GET.get('page')),
+        'current_category': current_category,
+        'filter_form': filter_form,
+        'total_results': documents.count(),
+    }
+    return render(request, 'archive/document_list.html', context)
+
+# Halaman SPD
+def spd_list(request):
+    """
+    View khusus untuk list dokumen SPD
+    
+    Fitur:
+        - Filter by employee (Select2 dropdown)
+        - Filter by destination (termasuk destination_other)
+        - Filter by search (nama pegawai atau tujuan)
+        - Filter by date range
+        - Pagination (5 items per page)
+        - Query optimization dengan select_related & prefetch
+    
+    Args:
+        request: HttpRequest object
+    
+    Returns:
+        Rendered template dengan context
+    
+    Query Optimization:
+        - select_related: category, created_by, spd_info__employee
+        - Total queries: 2-3 (documents + pagination + form data)
+    """
+
+    # Debug Script
+    reset_queries()
+
+    documents = (
+        Document.objects
+        .filter(is_deleted=False, category__slug='spd')
+        .select_related('category', 'created_by', 'spd_info__employee')
+        .order_by('-document_date', '-created_at')
+    )
+
+    # Filter form dengan is_spd=True
+    filter_form = DocumentFilterForm(request.GET or None, is_spd=True)
+
+    # Apply filters
+    if filter_form.is_valid():
+        search = filter_form.cleaned_data.get('search')
+        employee = filter_form.cleaned_data.get('employee')
+        destination = filter_form.cleaned_data.get('destination')
+        date_from = filter_form.cleaned_data.get('date_from')
+        date_to = filter_form.cleaned_data.get('date_to')
+        
+        # Search filter (nama pegawai atau tujuan)
+        if search:
             documents = documents.filter(
-                Q(category=category) | Q(category__parent=category)
+                Q(spd_info__employee__name__icontains=search) |
+                Q(spd_info__destination__icontains=search) |
+                Q(spd_info__destination_other__icontains=search)
+            )
+        
+        # Employee filter
+        if employee:
+            documents = documents.filter(spd_info__employee=employee)
+        
+        # Destination filter
+        if destination:
+            # Filter bisa match destination atau destination_other
+            documents = documents.filter(
+                Q(spd_info__destination=destination) |
+                Q(spd_info__destination_other__icontains=destination)
             )
         
         # Date range filter
@@ -196,28 +266,20 @@ def document_list(request, category_slug=None):
         
         if date_to:
             documents = documents.filter(document_date__lte=date_to)
-        
-        # Employee filter (for SPD)
-        if employee:
-            documents = documents.filter(spd_info__employee=employee)
 
-    # Pagination
-    paginator = Paginator(documents, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'page_obj': page_obj,
-        'current_category': current_category,
-        'filter_form': filter_form,
-        'total_results': documents.count(),
-    }
-
+    # Debug script
     print(f"Total queries: {len(connection.queries)}")
     for query in connection.queries:
         print(f"  {query['time']}s: {query['sql'][:100]}")
-    
-    return render(request, 'archive/document_list.html', context)
+
+    context = {
+        'page_obj': Paginator(documents, 5).get_page(request.GET.get('page')),
+        'current_category': DocumentCategory.objects.get(slug='spd'),
+        'filter_form': filter_form,
+        'total_results': documents.count(),
+    }
+    return render(request, 'archive/spd_list.html', context)
+
 
 
 @login_required

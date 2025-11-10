@@ -1,0 +1,60 @@
+{% load static %}
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Filter Dokumen</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="get" action="{% url 'archive:document_list' %}">
+                <div class="modal-body">
+                    <!-- Search -->
+                    <div class="form-group">
+                        <label class="form-control-label" for="{{ filter_form.search.id_for_label }}">
+                            {{ filter_form.search.label }}
+                        </label>
+                        {{ filter_form.search }}
+                    </div>
+                    
+                    <!-- Categpry -->
+                    <div class="form-group">
+                        <label class="form-control-label" for="{{ filter_form.category.id_for_label }}">
+                            {{ filter_form.category.label }}
+                        </label>
+                        {{ filter_form.category }}
+                    </div>
+
+                    <!-- Date Range Filter -->
+                    <div class="row input-daterange datepicker align-items-center form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label" for="{{ filter_form.date_from.id_for_label }}">
+                                    {{ filter_form.date_from.label }}
+                                </label>
+                                {{ filter_form.date_from }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label" for="{{ filter_form.date_to.id_for_label }}">
+                                    {{ filter_form.date_to.label }}
+                                </label>
+                                {{ filter_form.date_to }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="modal-footer">
+                    <a href="{% url 'archive:document_list' %}" class="btn btn-secondary">Reset</a>
+                    <button type="submit" class="btn btn-default">Terapkan Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

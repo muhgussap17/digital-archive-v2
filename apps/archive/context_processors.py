@@ -54,20 +54,18 @@ def sidebar_context(request):
             {% for category in categories %}
                 {{ category.name }} - {{ category.parent_docs|add:category.children_docs }}
             {% endfor %}
-        - Total Dokumen:
-            {{ total_documents }}
         - Child Categories:
             {% for category in categories %}
                 {% for child in category.children.all %}
                     {{ child.name }} - {{ child.children_docs }}
                 {% endfor %}
             {% endfor %}
+        - Total Dokumen:
+            {{ total_documents }}
     """
     from django.db.models import Prefetch, Q, Count
     
-    # Query parent categories dengan annotasi jumlah dokumen
-    # Annotate akan menghitung di database, bukan di Python
-    # Annotate untuk setiap kategori anak (child)
+    # Prefetch children categories terlebih dahulu
     children_qs = DocumentCategory.objects.annotate(
         children_docs=Count(
             'documents',
@@ -76,12 +74,11 @@ def sidebar_context(request):
         )
     ).order_by('name')
 
-    # Annotate untuk parent + gabungan dokumen anak
+    # Query parent categories dengan prefetch children
     categories = DocumentCategory.objects.filter(
         parent__isnull=True
     ).prefetch_related(
-        Prefetch('children', queryset=children_qs)
-        # 'children'  # Prefetch children untuk menghindari query tambahan
+        Prefetch('children', queryset=children_qs) # Prefetch dengan queryset custom
     ).annotate(
         # Hitung dokumen dari kategori ini
         parent_docs=Count(

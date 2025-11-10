@@ -48,7 +48,7 @@ class DocumentForm(forms.ModelForm):
         fields = ['category', 'document_date', 'file']
     
     def clean_file(self):
-        """Validate PDF file"""
+        """Validasi file PDF"""
         file = self.cleaned_data.get('file')
         
         if file:
@@ -214,7 +214,7 @@ class SPDDocumentForm(forms.Form):
     )
     
     def clean_file(self):
-        """Validate PDF file"""
+        """Validasi file PDF"""
         file = self.cleaned_data.get('file')
         
         if file:
@@ -366,7 +366,21 @@ class SPDDocumentUpdateForm(forms.Form):
     
 class DocumentFilterForm(forms.Form):
     """
-    Form untuk filtering documents
+    Universal filter form untuk Document dan SPD
+    
+    Field yang tampil berbeda tergantung jenis dokumen:
+    - Document (Belanjaan): search, category, date_from, date_to
+    - SPD: search, employee, destination, date_from, date_to
+    
+    Penggunaan:
+        # Untuk document list
+        form = DocumentFilterForm(request.GET or None, is_spd=False)
+        
+        # Untuk SPD list
+        form = DocumentFilterForm(request.GET or None, is_spd=True)
+    
+    Implementasi Standar:
+        Mengikuti best practice Django Forms untuk reusability
     """
     
     search = forms.CharField(
@@ -385,7 +399,6 @@ class DocumentFilterForm(forms.Form):
         empty_label="Semua Kategori",
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'onchange': 'this.form.submit()'
         }),
         label='Kategori'
     )
@@ -414,17 +427,62 @@ class DocumentFilterForm(forms.Form):
         label='Sampai Tanggal'
     )
     
+    # ====== FIELD KHUSUS SPD ======
+
     employee = forms.ModelChoiceField(
         queryset=Employee.objects.filter(is_active=True),
         required=False,
         empty_label="Semua Pegawai",
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'onchange': 'this.form.submit()'
+            # 'data-placeholder': 'Pilih Pegawai',
+            'data-allow-clear': 'true'
         }),
-        label='Pegawai (SPD)'
+        label='Nama Pegawai'
     )
 
+    destination = forms.ChoiceField(
+        choices=[('', 'Semua Tujuan')],  # Will be populated in __init__
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        }),
+        label='Tujuan'
+    )
+
+    def __init__(self, *args, is_spd=False, **kwargs):
+        """
+        Inisialisasi form dengan opsi is_spd
+        
+        Args:
+            is_spd (bool): True jika untuk SPD list, False untuk document list
+            
+        Behavior:
+            - Jika is_spd=True: hide category, show employee & destination
+            - Jika is_spd=False: show category, hide employee & destination
+        """
+        super().__init__(*args, **kwargs)
+        
+        # Populate destination choices dari SPDDocument
+        from .models import SPDDocument
+        self.fields['destination'].choices = [
+            ('', 'Semua Tujuan')
+        ] + list(SPDDocument.DESTINATION_CHOICES)
+        
+        if is_spd:
+            # SPD mode: hide category, show employee & destination
+            self.fields['category'].widget = forms.HiddenInput()
+            self.fields['category'].required = False
+            
+            # Update search placeholder untuk SPD
+            self.fields['search'].widget.attrs['placeholder'] = 'Cari nama pegawai atau tujuan...'
+        else:
+            # Document mode: hide employee & destination, show category
+            self.fields['employee'].widget = forms.HiddenInput()
+            self.fields['employee'].required = False
+            
+            self.fields['destination'].widget = forms.HiddenInput()
+            self.fields['destination'].required = False
 
 class EmployeeForm(forms.ModelForm):
     """

@@ -102,6 +102,10 @@ def dashboard(request):
     return render(request, 'archive/dashboard.html', context)
 
 
+def test(request):
+    return render(request, 'archive/test.html')
+
+
 # ==================== TEMPLATE VIEWS ====================
 
 # List updated logic
@@ -195,6 +199,7 @@ def document_list(request, category_slug=None):
     }
     return render(request, 'archive/document_list.html', context)
 
+
 # Halaman SPD
 def spd_list(request):
     """
@@ -279,7 +284,6 @@ def spd_list(request):
         'total_results': documents.count(),
     }
     return render(request, 'archive/spd_list.html', context)
-
 
 
 @login_required

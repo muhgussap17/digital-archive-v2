@@ -6,6 +6,7 @@ app_name = 'archive'
 urlpatterns = [
     # Dashboard
     path('', views.dashboard, name='dashboard'),
+    path('test/', views.test, name='test'),
     
     # Search Documents
     path('search/', views.search_documents, name='document_search'), 

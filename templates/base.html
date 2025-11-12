@@ -45,6 +45,9 @@
         <!-- Topnav -->
         {% include 'partials/navbar.html' %}
         
+        <!-- Panel -->
+        {% include 'partials/right_panel.html' %}
+
         <!-- Header -->
         {% block header %}
         <div class="header bg-default pb-6">
@@ -86,17 +89,9 @@
                 {% endfor %}
             {% endif %}
             
-            <div class="row ">
+            <div class="page-content">
                 <!-- Main Content -->
-                <div class="col-12" id="mainContent">
-                    
-                    {% block content %}{% endblock %}
-                </div>
-                
-                <!-- Right Detail Panel (collapsed by default) -->
-                <div class="col-xl-4 col-lg-5" id="detailPanel" style="display: none;">
-                    {% block detail_panel %}{% endblock %}
-                </div>
+                {% block content %}{% endblock %}
             </div>
             
             <!-- Footer -->

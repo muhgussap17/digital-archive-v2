@@ -51,33 +51,33 @@ def document_pre_delete(sender, instance, **kwargs):
             logger.error(f"Failed to delete physical file: {str(e)}")
 
 
-@receiver(post_save, sender=Document)
-def ensure_upload_directories(sender, instance, created, **kwargs):
-    """
-    Ensure upload directories exist for the category
-    """
-    if created and instance.category:
-        try:
-            category_path = instance.category.get_full_path()
-            years = range(2020, 2030)  # Prepare directories for common years
+# @receiver(post_save, sender=Document)
+# def ensure_upload_directories(sender, instance, created, **kwargs):
+#     """
+#     Ensure upload directories exist for the category
+#     """
+#     if created and instance.category:
+#         try:
+#             category_path = instance.category.get_full_path()
+#             years = range(2020, 2030)  # Prepare directories for common years
             
-            for year in years:
-                for month in range(1, 13):
-                    month_name = {
-                        1: '01-January', 2: '02-February', 3: '03-March',
-                        4: '04-April', 5: '05-May', 6: '06-June',
-                        7: '07-July', 8: '08-August', 9: '09-September',
-                        10: '10-October', 11: '11-November', 12: '12-December'
-                    }[month]
+#             for year in years:
+#                 for month in range(1, 13):
+#                     month_name = {
+#                         1: '01-January', 2: '02-February', 3: '03-March',
+#                         4: '04-April', 5: '05-May', 6: '06-June',
+#                         7: '07-July', 8: '08-August', 9: '09-September',
+#                         10: '10-October', 11: '11-November', 12: '12-December'
+#                     }[month]
                     
-                    directory = os.path.join(
-                        settings.MEDIA_ROOT,
-                        'uploads',
-                        category_path,
-                        str(year),
-                        month_name
-                    )
+#                     directory = os.path.join(
+#                         settings.MEDIA_ROOT,
+#                         'uploads',
+#                         category_path,
+#                         str(year),
+#                         month_name
+#                     )
                     
-                    os.makedirs(directory, exist_ok=True)
-        except Exception as e:
-            logger.error(f"Failed to create upload directories: {str(e)}")
+#                     os.makedirs(directory, exist_ok=True)
+#         except Exception as e:
+#             logger.error(f"Failed to create upload directories: {str(e)}")

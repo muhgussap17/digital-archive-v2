@@ -1,3 +1,7 @@
+{% load static %}
+{% load custom_tags %}
+{% load date_filters %}
+
 <div class="right-inspect-panel card" id="inspectPanelRight">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Inspect Panel</h5>
@@ -6,7 +10,109 @@
         </button>
     </div>
     
-    <div class="card-body">
-        <p>Ini adalah konten panel kanan Anda.</p>
+    <div class="card-body p-0">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="detailTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="detail-tab" data-bs-toggle="tab" data-bs-target="#detail" type="button" role="tab" aria-controls="detail">Detail</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="aktivitas-tab" data-bs-toggle="tab" data-bs-target="#aktivitas" type="button" role="tab" aria-controls="aktivitas">Aktivitas</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="detailTabsContent">
+            <!-- Tab Detail -->
+            <div class="tab-pane fade show active" id="detail" role="tabpanel" aria-labelledby="detail-tab">
+                <!-- Document Preview -->
+                <div class="document-preview-thumb">
+                    <div class="preview-icon">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                </div>
+                
+                <!-- Document Title -->
+                <h6 class="mb-3 font-weight-bold" id="docTitle">{{ document.get_display_name }}</h6>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions mb-4">
+                    <a href="#" 
+                    class="btn btn-sm btn-info" 
+                    target="_blank">
+                        <i class="fa-solid fa-eye"></i> Preview
+                    </a>
+                    <a href="#" 
+                    class="btn btn-sm btn-success">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+                
+                <!-- Document Info -->
+                <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                    Informasi Dokumen
+                </h6>
+                
+                <ul class="detail-info-list">
+                    <li>
+                        <span class="info-label">Kategori</span>
+                        <span class="info-value"><span class="badge-warning">-</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Tanggal Dokumen</span>
+                        <span class="info-value">-</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Nama File</span>
+                        <span class="info-value">-</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Ukuran</span>
+                        <span class="info-value">-</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Diupload Oleh</span>
+                        <span class="info-value">-</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Tanggal Upload</span>
+                        <span class="info-value">-</span>
+                    </li>
+                </ul>
+                
+                <!-- SPD Specific Info -->
+                {% if document.spd_info %}
+                <h6 class="text-uppercase text-muted mt-4 mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                    Informasi SPD
+                </h6>
+                
+                <ul class="detail-info-list">
+                    <li>
+                        <span class="info-label">Nama Pegawai</span>
+                        <span class="info-value">
+                            {{ document.spd_info.employee.name }}<br>
+                            <small class="text-muted">NIP: {{ document.spd_info.employee.nip }}</small>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="info-label">Tujuan</span>
+                        <span class="info-value">{{ document.spd_info.get_destination_display_full }}</span>
+                    </li>
+                    <li>
+                        <span class="info-label">Periode</span>
+                        <span class="info-value">
+                            {{ document.spd_info.start_date|indo_date:'short' }} - 
+                            {{ document.spd_info.end_date|indo_date:'short' }}<br>
+                            <small class="text-muted">({{ document.spd_info.get_duration_days }} hari)</small>
+                        </span>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+
+            <!-- Tab Aktivitas -->
+            <div class="tab-pane fade" id="aktivitas" role="tabpanel" aria-labelledby="aktivitas-tab">
+                
+            </div>
+        </div>
     </div>
 </div>

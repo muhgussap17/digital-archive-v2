@@ -117,11 +117,31 @@ class Employee(models.Model):
 
 
 def document_upload_path(instance, filename):
-    """Generate upload path based on category and date"""
+    """
+    Generate upload path berdasarkan kategori dan tanggal
+    
+    Format path: uploads/{category_path}/{year}/{month}/{filename}
+    Contoh: uploads/belanjaan/atk/2024/01-Januari/ATK_2024-01-15.pdf
+    
+    Args:
+        instance: Document instance
+        filename: Original filename dari upload
+        
+    Returns:
+        str: Relative path untuk file upload
+        
+    Implementasi Standar:
+        - Nama bulan menggunakan Bahasa Indonesia
+        - Format konsisten untuk semua kategori
+        - Year dan month untuk organisasi folder
+    """
+    from .constants import DateFormat
+    
     category_path = instance.category.get_full_path()
     date = instance.document_date or datetime.now()
-    year = date.strftime('%Y')
-    month = date.strftime('%m-%B')
+    
+    # Gunakan helper function untuk konsistensi
+    year, month_folder = DateFormat.get_folder_path(date)
     
     # Get original extension
     _, ext = os.path.splitext(filename)
@@ -129,7 +149,9 @@ def document_upload_path(instance, filename):
         ext = '.pdf'
 
     # Generate filename based on category
-    if instance.category.slug == 'spd' or (instance.category.parent and instance.category.parent.slug == 'spd'):
+    if instance.category.slug == 'spd' or (
+        instance.category.parent and instance.category.parent.slug == 'spd'
+    ):
         # SPD: Tunggu spd_info, untuk sementara pakai format umum
         # Akan di-rename setelah SPDDocument created
         date_str = date.strftime('%Y-%m-%d')
@@ -141,15 +163,14 @@ def document_upload_path(instance, filename):
         date_str = date.strftime('%Y-%m-%d')
         
         # PRESERVE CASE: Don't use slugify, just remove spaces and special chars
-        # Keep original capitalization
         import re
         clean_name = re.sub(r'[^\w\s-]', '', category_name)
         clean_name = re.sub(r'[-\s]+', '', clean_name)
         
         new_filename = f"{clean_name}_{date_str}{ext}"
     
-    # Build full path
-    return f"uploads/{category_path}/{year}/{month}/{new_filename}"
+    # Build full path dengan month folder Indonesia
+    return f"uploads/{category_path}/{year}/{month_folder}/{new_filename}"
 
 
 class Document(models.Model):

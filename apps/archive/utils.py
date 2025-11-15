@@ -1,9 +1,10 @@
 import os
 import re
+from datetime import datetime
 from django.conf import settings
 from django.utils.text import slugify
 from .models import DocumentActivity
-from datetime import datetime
+from .constants import DateFormat
 
 
 def get_client_ip(request):
@@ -201,15 +202,14 @@ def rename_document_file(document, new_filename=None):
                 os.rename(old_path, new_path)
                 
                 # Update database with new filename
-                year = document.document_date.strftime('%Y')
-                month = document.document_date.strftime('%m-%B')
+                year, month_folder = DateFormat.get_folder_path(document.document_date)
                 category_path = document.category.get_full_path()
                 
                 new_relative_path = os.path.join(
                     'uploads',
                     category_path,
                     year,
-                    month,
+                    month_folder,
                     new_filename
                 )
                 
@@ -245,23 +245,20 @@ def move_document_file(document, old_category=None, old_date=None):
         if not os.path.exists(old_path):
             return None
         
-        # Generate new path based on current metadata
-        category_path = document.category.get_full_path()
-        date = document.document_date
-        year = date.strftime('%Y')
-        month = date.strftime('%m-%B') # 01-January format
-        
         # Generate new filename
         if document.category.slug == 'spd' or (document.category.parent and document.category.parent.slug == 'spd'):
             try:
-                spd_info = document.spd_info
-                new_filename = generate_spd_filename(spd_info)
+                new_filename = generate_spd_filename(document.spd_info)
             except:
                 # SPD info not available, use generic
-                date_str = date.strftime('%Y-%m-%d')
+                date_str = document.document_date.strftime('%Y-%m-%d')
                 new_filename = f"SPD_{date_str}_{document.id}.pdf"
         else:
             new_filename = generate_belanjaan_filename(document)
+        
+        # Generate new path based on current metadata
+        category_path = document.category.get_full_path()
+        year, month_folder = DateFormat.get_folder_path(document.document_date)
         
         # Build new directory path
         new_dir = os.path.join(
@@ -269,7 +266,7 @@ def move_document_file(document, old_category=None, old_date=None):
             'uploads',
             category_path,
             year,
-            month
+            month_folder
         )
         
         # Create directory if not exists
@@ -305,7 +302,7 @@ def move_document_file(document, old_category=None, old_date=None):
                 'uploads',
                 category_path,
                 year,
-                month,
+                month_folder,
                 new_filename
             )
             

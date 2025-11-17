@@ -1,36 +1,41 @@
 <div class="dropdown-menu">
-<!-- Download -->
-<a href="{% url 'archive:document_download' document.id %}" class="dropdown-item text-default" target="_blank" data-toggle="tooltip">
-    <i class="fa-solid fa-download"></i>Download
-</a>
-<!-- Edit (Staff Only) -->
-<a class="dropdown-item text-default"
-    data-action="{% if has_spd %}edit-spd{% else %}edit-document{% endif %}"
-    data-document-id="{{ document.id }}"
-    data-toggle="tooltip">
-    <i class="fa-solid fa-pen"></i>Edit
-</a>
-<!-- Preview -->
-<a href="{% url 'archive:document_preview' document.id %}" class="dropdown-item text-default" target="_blank" data-toggle="tooltip">
-    <i class="fa-solid fa-eye"></i>Preview
-</a>
+    <!-- Download -->
+    <a href="{% url 'archive:document_download' document.id %}" 
+        class="dropdown-item text-default" 
+        target="_blank" 
+        data-toggle="tooltip">
+        <i class="fa-solid fa-download"></i>Download
+    </a>
+    <!-- Edit (Staff Only) -->
+    <a class="dropdown-item text-default"
+        data-action="{% if has_spd %}edit-spd{% else %}edit-document{% endif %}"
+        data-document-id="{{ document.id }}"
+        data-toggle="tooltip">
+        <i class="fa-solid fa-pen"></i>Edit
+    </a>
+    <!-- Preview -->
+    <a href="{% url 'archive:document_preview' document.id %}" 
+        class="dropdown-item text-default" 
+        data-toggle="tooltip">
+        <i class="fa-solid fa-eye"></i>Preview
+    </a>
 
-<div class="dropdown-divider"></div>
+    <div class="dropdown-divider"></div>
 
-<!-- Detail -->
-<a href="#" class="dropdown-item text-default">
-    <i class="fa-solid fa-circle-info"></i>Detail
-</a>
+    <!-- Detail -->
+    <a href="#" class="dropdown-item text-default">
+        <i class="fa-solid fa-circle-info"></i>Detail
+    </a>
 
-<div class="dropdown-divider"></div>
+    <div class="dropdown-divider"></div>
 
-<!-- Delete (Staff Only) -->
-<a class="dropdown-item text-default"
-    class="btn btn-danger"
-    data-action="delete-document"
-    data-document-id="{{ document.id }}"
-    data-document-type="{% if has_spd %}spd{% else %}document{% endif %}"
-    data-toggle="tooltip">
-    <i class="fa-solid fa-trash"></i>Delete
-</a>
+    <!-- Delete (Staff Only) -->
+    <a class="dropdown-item text-default"
+        class="btn btn-danger"
+        data-action="delete-document"
+        data-document-id="{{ document.id }}"
+        data-document-type="{% if has_spd %}spd{% else %}document{% endif %}"
+        data-toggle="tooltip">
+        <i class="fa-solid fa-trash"></i>Delete
+    </a>
 </div>

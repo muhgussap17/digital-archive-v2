@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Preview: {{ document.get_display_name }} - Sistem Arsip Digital{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* PDF Viewer Container */
+    .pdf-viewer-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: #2d3748;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Toolbar */
+    .pdf-toolbar {
+        background-color: #1a202c;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .pdf-toolbar-left,
+    .pdf-toolbar-center,
+    .pdf-toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Toolbar Buttons */
+    .pdf-btn {
+        background-color: #4a5568;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .pdf-btn:hover {
+        background-color: #5a6c7d;
+    }
+    
+    .pdf-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .pdf-btn-primary {
+        background-color: #5a67d8;
+    }
+    
+    .pdf-btn-primary:hover {
+        background-color: #4c51bf;
+    }
+    
+    .pdf-btn-danger {
+        background-color: #f56565;
+    }
+    
+    .pdf-btn-danger:hover {
+        background-color: #e53e3e;
+    }
+    
+    /* Document Info */
+    .pdf-doc-info {
+        color: #cbd5e0;
+        font-size: 0.875rem;
+    }
+    
+    /* Page Info */
+    .pdf-page-info {
+        color: #cbd5e0;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .pdf-page-input {
+        width: 60px;
+        text-align: center;
+        background-color: #4a5568;
+        color: white;
+        border: 1px solid #718096;
+        border-radius: 0.25rem;
+        padding: 0.25rem;
+    }
+    
+    /* Canvas Container */
+    .pdf-canvas-container {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        background-color: #2d3748;
+    }
+    
+    .pdf-canvas-wrapper {
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        max-width: 100%;
+        max-height: 100%;
+    }
+    
+    #pdf-canvas {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Loading Spinner */
+    .pdf-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+    }
+    
+    .pdf-spinner {
+        width: 4rem;
+        height: 4rem;
+        border: 4px solid #4a5568;
+        border-top-color: #5a67d8;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .pdf-toolbar {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .pdf-toolbar-left,
+        .pdf-toolbar-center,
+        .pdf-toolbar-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .pdf-canvas-container {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- PDF Viewer Container -->
+<div class="pdf-viewer-container">
+    <!-- Toolbar -->
+    <div class="pdf-toolbar">
+        <!-- Left: Close & Document Info -->
+        <div class="pdf-toolbar-left">
+            <button class="pdf-btn pdf-btn-danger" onclick="closePdfViewer()">
+                <i class="fa-solid fa-times"></i>
+                <span>Tutup</span>
+            </button>
+            <div class="pdf-doc-info">
+                <strong>{{ document.get_display_name }}</strong>
+                <span class="ml-2">({{ file_size_display }})</span>
+            </div>
+        </div>
+        
+        <!-- Center: Navigation & Zoom -->
+        <div class="pdf-toolbar-center">
+            <!-- Page Navigation -->
+            <button class="pdf-btn" id="prev-page" onclick="prevPage()">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            
+            <div class="pdf-page-info">
+                <span>Halaman</span>
+                <input type="number" id="page-num" class="pdf-page-input" value="1" min="1" onchange="goToPage()">
+                <span>dari <span id="page-count">-</span></span>
+            </div>
+            
+            <button class="pdf-btn" id="next-page" onclick="nextPage()">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            
+            <!-- Zoom Controls -->
+            <button class="pdf-btn" onclick="zoomOut()">
+                <i class="fa-solid fa-magnifying-glass-minus"></i>
+            </button>
+            
+            <span class="pdf-page-info" id="zoom-level">100%</span>
+            
+            <button class="pdf-btn" onclick="zoomIn()">
+                <i class="fa-solid fa-magnifying-glass-plus"></i>
+            </button>
+        </div>
+        
+        <!-- Right: Actions -->
+        <div class="pdf-toolbar-right">
+            <button class="pdf-btn" onclick="printPdf()">
+                <i class="fa-solid fa-print"></i>
+                <span>Print</span>
+            </button>
+            
+            <a href="{% url 'archive:document_download' document.id %}" class="pdf-btn pdf-btn-primary">
+                <i class="fa-solid fa-download"></i>
+                <span>Download</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Canvas Container -->
+    <div class="pdf-canvas-container" id="canvas-container">
+        <!-- Loading Spinner -->
+        <div class="pdf-loading" id="pdf-loading">
+            <div class="pdf-spinner"></div>
+            <p>Memuat PDF...</p>
+        </div>
+        
+        <!-- Canvas Wrapper -->
+        <div class="pdf-canvas-wrapper" id="canvas-wrapper" style="display: none;">
+            <canvas id="pdf-canvas"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- PDF.js Library dari CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+// PDF.js Configuration
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Global variables
+let pdfDoc = null;
+let pageNum = 1;
+let pageIsRendering = false;
+let pageNumIsPending = null;
+let scale = 1.5; // Default zoom
+
+const canvas = document.getElementById('pdf-canvas');
+const ctx = canvas.getContext('2d');
+const pdfUrl = '{{ file_url }}';
+
+/**
+ * Render halaman PDF
+ */
+function renderPage(num) {
+    pageIsRendering = true;
+    
+    // Get page
+    pdfDoc.getPage(num).then(page => {
+        // Set scale
+        const viewport = page.getViewport({ scale: scale });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Render PDF page
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        renderTask.promise.then(() => {
+            pageIsRendering = false;
+            
+            // Check if another page rendering is pending
+            if (pageNumIsPending !== null) {
+                renderPage(pageNumIsPending);
+                pageNumIsPending = null;
+            }
+        });
+    });
+    
+    // Update page counter
+    document.getElementById('page-num').value = num;
+}
+
+/**
+ * Queue page rendering
+ */
+function queueRenderPage(num) {
+    if (pageIsRendering) {
+        pageNumIsPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+/**
+ * Previous page
+ */
+function prevPage() {
+    if (pageNum <= 1) {
+        return;
+    }
+    pageNum--;
+    queueRenderPage(pageNum);
+}
+
+/**
+ * Next page
+ */
+function nextPage() {
+    if (pageNum >= pdfDoc.numPages) {
+        return;
+    }
+    pageNum++;
+    queueRenderPage(pageNum);
+}
+
+/**
+ * Go to specific page
+ */
+function goToPage() {
+    const input = document.getElementById('page-num');
+    let num = parseInt(input.value);
+    
+    if (num < 1) num = 1;
+    if (num > pdfDoc.numPages) num = pdfDoc.numPages;
+    
+    pageNum = num;
+    queueRenderPage(pageNum);
+}
+
+/**
+ * Zoom in
+ */
+function zoomIn() {
+    if (scale >= 3) return; // Max zoom 300%
+    scale += 0.25;
+    updateZoomLevel();
+    queueRenderPage(pageNum);
+}
+
+/**
+ * Zoom out
+ */
+function zoomOut() {
+    if (scale <= 0.5) return; // Min zoom 50%
+    scale -= 0.25;
+    updateZoomLevel();
+    queueRenderPage(pageNum);
+}
+
+/**
+ * Update zoom level display
+ */
+function updateZoomLevel() {
+    document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+/**
+ * Print PDF
+ */
+function printPdf() {
+    window.print();
+}
+
+/**
+ * Close PDF viewer
+ */
+function closePdfViewer() {
+    window.history.back();
+}
+
+/**
+ * Keyboard shortcuts
+ */
+document.addEventListener('keydown', function(e) {
+    // Escape - close viewer
+    if (e.key === 'Escape') {
+        closePdfViewer();
+    }
+    // Left arrow - previous page
+    if (e.key === 'ArrowLeft') {
+        prevPage();
+    }
+    // Right arrow - next page
+    if (e.key === 'ArrowRight') {
+        nextPage();
+    }
+    // Plus/Equals - zoom in
+    if (e.key === '+' || e.key === '=') {
+        zoomIn();
+    }
+    // Minus - zoom out
+    if (e.key === '-') {
+        zoomOut();
+    }
+});
+
+/**
+ * Load PDF
+ */
+pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+    pdfDoc = pdf;
+    document.getElementById('page-count').textContent = pdf.numPages;
+    
+    // Hide loading, show canvas
+    document.getElementById('pdf-loading').style.display = 'none';
+    document.getElementById('canvas-wrapper').style.display = 'block';
+    
+    // Render first page
+    renderPage(pageNum);
+    
+    // Update zoom level display
+    updateZoomLevel();
+    
+}).catch(err => {
+    console.error('Error loading PDF:', err);
+    document.getElementById('pdf-loading').innerHTML = `
+        <div class="text-center">
+            <i class="fa-solid fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+            <p>Gagal memuat PDF</p>
+            <p class="text-sm">${err.message}</p>
+            <button class="pdf-btn pdf-btn-danger mt-3" onclick="closePdfViewer()">
+                Tutup
+            </button>
+        </div>
+    `;
+});
+</script>
+{% endblock %}

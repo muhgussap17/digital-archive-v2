@@ -1378,9 +1378,79 @@ def spd_delete(request, pk):
 # ==================== ACTIONS ====================
 
 @login_required
-def document_detail(request, document_id):
-    return HttpResponse("<h1>Halaman ini masih dalam pengembangan 🚧</h1>")
+def document_detail(request, pk):
+    """
+    Get document detail untuk right panel (AJAX)
+    
+    Returns JSON dengan HTML fragment untuk detail content
+    """
+    document = get_object_or_404(Document, pk=pk, is_deleted=False)
+    
+    try:
+        # Prepare context
+        context = {
+            'document': document,
+        }
+        
+        # Render detail HTML
+        detail_html = render_to_string(
+            'archive/includes/document_detail_content.html',
+            context,
+            request=request
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'document_name': document.get_display_name(),
+            'detail_html': detail_html
+        })
+        
+    except Exception as e:
+        logger.error(f'Error loading document detail {pk}: {str(e)}')
+        return JsonResponse({
+            'success': False,
+            'message': f'Gagal memuat detail: {str(e)}'
+        }, status=500)
 
+
+@login_required
+def document_activities(request, pk):
+    """
+    Get document activities untuk right panel (AJAX)
+    
+    Returns JSON dengan HTML fragment untuk activity timeline
+    """
+    document = get_object_or_404(Document, pk=pk, is_deleted=False)
+    
+    try:
+        # Get activities (latest first)
+        activities = document.activities.select_related('user').order_by('-created_at')[:20]
+        
+        # Prepare context
+        context = {
+            'document': document,
+            'activities': activities,
+        }
+        
+        # Render activity HTML
+        activity_html = render_to_string(
+            'archive/includes/document_activity_content.html',
+            context,
+            request=request
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'activity_html': activity_html
+        })
+        
+    except Exception as e:
+        logger.error(f'Error loading document activities {pk}: {str(e)}')
+        return JsonResponse({
+            'success': False,
+            'message': f'Gagal memuat aktivitas: {str(e)}'
+        }, status=500)
+    
 
 @login_required
 def document_download(request, pk):

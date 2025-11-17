@@ -18,7 +18,7 @@
         <!-- Table Body -->
         <tbody class="list">
             {% for document in page_obj %}
-            <tr class="document-row" data-document-id="{{ document.id }}">
+            <tr class="document-row" data-document-id="{{ document.id }}" style="cursor: pointer;">
                 <td class="font-weight-bold">
                     <i class="fa-solid fa-file-pdf fa-lg text-danger mr-2"></i>{{ document.get_filename }}
                 </td>

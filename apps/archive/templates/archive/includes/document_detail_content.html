@@ -1,0 +1,109 @@
+{% load static %}
+{% load date_filters %}
+{% load custom_tags %}
+
+<!-- PDF Thumbnail Preview (Optional) -->
+<div class="row mb-3">
+    <div class="col text-center">
+        <a href="{% url 'archive:document_preview' document.id %}" class="d-block">
+            <div class="bg-secondary rounded p-4" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-file-pdf fa-4x text-danger"></i>
+            </div>
+            <small class="text-muted mt-2 d-block">Klik untuk preview</small>
+        </a>
+    </div>
+</div>
+
+<!-- Detail File -->
+<div class="row">
+    <div class="col">
+        <h4 class="mb-2">Detail File</h4>
+        
+        <small class="font-weight-600 text-gray-dark">Jenis</small>
+        <p class="text-sm lh-130 mb-3">PDF</p>
+        
+        <small class="font-weight-600 text-gray-dark">Ukuran</small>
+        <p class="text-sm lh-130 mb-3">{{ document.get_file_size_display }}</p>
+        
+        <small class="font-weight-600 text-gray-dark">Nama File</small>
+        <p class="text-sm lh-130 mb-3 text-truncate" title="{{ document.get_filename }}">
+            {{ document.get_filename }}
+        </p>
+        
+        <small class="font-weight-600 text-gray-dark">Pengunggah</small>
+        <p class="text-sm lh-130 mb-3">{{ document.created_by.get_full_name|default:document.created_by.username }}</p>
+        
+        {% if document.updated_at and document.updated_at|date:"U" > document.created_at|date:"U" %}
+        <small class="font-weight-600 text-gray-dark">Dimodifikasi</small>
+        <p class="text-sm lh-130 mb-3">
+            {{ document.updated_at|indo_date:'datetime' }}
+            <br>
+            <span class="text-xs lh-100 text-muted">oleh {{ document.created_by.username }}</span>
+        </p>
+        {% endif %}
+        
+        <small class="font-weight-600 text-gray-dark">Dibuat</small>
+        <p class="text-sm lh-130 mb-3">
+            {{ document.created_at|indo_date:'datetime' }}
+            <br>
+            <span class="text-xs lh-100 text-muted">oleh {{ document.created_by.username }}</span>
+        </p>
+        
+        <!-- <small class="font-weight-600 text-gray-dark">Versi</small>
+        <p class="text-sm lh-130 mb-3">v{{ document.version }}</p> -->
+    </div>
+</div>
+
+<hr class="mt-1 mb-4">
+
+<!-- Detail Dokumen -->
+<div class="row">
+    <div class="col">
+        <h4 class="mb-2">Detail Dokumen</h4>
+        
+        {% if document.spd_info %}
+            <!-- SPD Document -->
+            <small class="font-weight-600 text-gray-dark">Kategori</small>
+            <p class="text-sm lh-130 mb-3">{{ document.category.name }}</p>
+            
+            <small class="font-weight-600 text-gray-dark">Pegawai</small>
+            <p class="text-sm lh-130 mb-3">{{ document.spd_info.employee.name }}</p>
+            
+            <!-- <small class="font-weight-600 text-gray-dark">NIP</small>
+            <p class="text-sm lh-130 mb-3">{{ document.spd_info.employee.nip }}</p> -->
+            
+            <!-- <small class="font-weight-600 text-gray-dark">Jabatan</small>
+            <p class="text-sm lh-130 mb-3">{{ document.spd_info.employee.position }}</p> -->
+            
+            <small class="font-weight-600 text-gray-dark">Tujuan</small>
+            <p class="text-sm lh-130 mb-3">{{ document.spd_info.get_destination_display_full }}</p>
+            
+            <small class="font-weight-600 text-gray-dark">Tanggal Perjalanan Dinas</small>
+            <p class="text-sm lh-130 mb-3">
+                {% if document.spd_info.start_date == document.spd_info.end_date %}
+                    {{ document.spd_info.start_date|indo_date }}
+                {% else %}
+                    {{ document.spd_info.start_date|indo_date }} s/d {{ document.spd_info.end_date|indo_date }}
+                {% endif %}
+                <br>
+                <span class="text-muted">({{ document.spd_info.get_duration_days }} hari)</span>
+            </p>
+            
+            <small class="font-weight-600 text-gray-dark">Tanggal Dokumen SPD</small>
+            <p class="text-sm lh-130 mb-3">{{ document.document_date|indo_date }}</p>
+        
+        {% else %}
+            <!-- Regular Document (Belanjaan) -->
+            <small class="font-weight-600 text-gray-dark">Kategori</small>
+            <p class="text-sm lh-130 mb-3">{{ document.category.name }}</p>
+            
+            {% if document.category.parent %}
+            <small class="font-weight-600 text-gray-dark">Parent Kategori</small>
+            <p class="text-sm lh-130 mb-3">{{ document.category.parent.name }}</p>
+            {% endif %}
+            
+            <small class="font-weight-600 text-gray-dark">Tanggal Dokumen</small>
+            <p class="text-sm lh-130 mb-3">{{ document.document_date|indo_date }}</p>
+        {% endif %}
+    </div>
+</div>

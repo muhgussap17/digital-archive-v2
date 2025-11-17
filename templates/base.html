@@ -40,7 +40,7 @@
     {% include 'partials/sidebar.html' %}
 
     <!-- Main content -->
-    <div class="main-content right-panel-active" id="panel">
+    <div class="main-content" id="panel">
         
         <!-- Topnav -->
         {% include 'partials/navbar.html' %}
@@ -134,8 +134,9 @@
     <!-- Custom JS -->
     <script src="{% static 'js/custom.js' %}"></script>
     
-    <!-- Modal Handler JS -->
+    <!-- Handler JS -->
     <script src="{% static 'js/modal_handler.js' %}"></script>
+    <script src="{% static 'js/panel_handler.js' %}"></script>
 
     <script>
         // CSRF token untuk AJAX - IMPROVED

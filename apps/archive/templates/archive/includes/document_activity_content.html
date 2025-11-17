@@ -1,0 +1,41 @@
+{% load static %}
+{% load date_filters %}
+
+<div class="timeline timeline-one-side" data-timeline-content="axis" data-timeline-axis-style="dashed">
+    {% for activity in activities %}
+    <div class="timeline-block">
+        <span class="timeline-step badge-default">
+            <i class="fa-solid fa-{{ activity.action_type|get_activity_icon }}"></i>
+        </span>
+        <div class="timeline-content">
+            <p class="text-sm text-gray-dark mb-0">
+                <strong>{{ activity.user.username|default:'System' }}</strong>
+                {{ activity.get_action_type_display|lower }}
+                {% if activity.description %}
+                <br>
+                <span class="text-muted">{{ activity.description|truncatechars:100 }}</span>
+                {% endif %}
+            </p>
+            <p class="text-xs text-gray-dark lh-100 mb-0">
+                {% now "Y" as current_year %}
+                {% if activity.created_at.year|stringformat:"s" == current_year %}
+                    {{ activity.created_at|date:"H.i d M" }}
+                {% else %}
+                    {{ activity.created_at|date:"d M Y, H.i" }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-4">
+        <i class="fa-solid fa-clock fa-2x text-muted mb-2"></i>
+        <p class="text-muted">Belum ada aktivitas</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if activities|length >= 20 %}
+<div class="text-center mt-3">
+    <small class="text-muted">Menampilkan 20 aktivitas terakhir</small>
+</div>
+{% endif %}

@@ -54,11 +54,24 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.accounts.decorators import staff_required
 from apps.accounts.permissions import IsStaffOrReadOnly
 
-from .models import Document, DocumentCategory, SPDDocument, DocumentActivity, Employee
-from .forms import DocumentFilterForm, DocumentForm, DocumentUpdateForm, SPDDocumentForm, SPDDocumentUpdateForm, EmployeeForm
+from .models import (
+    Document, 
+    DocumentCategory, 
+    SPDDocument, 
+    DocumentActivity, 
+    Employee
+)
+from .forms import (
+    DocumentForm, 
+    DocumentUpdateForm, 
+    SPDDocumentForm, 
+    SPDDocumentUpdateForm, 
+    DocumentFilterForm,
+    EmployeeForm
+)
 from .serializers import DocumentSerializer, CategorySerializer, SPDSerializer
 from .utils import (
-    log_document_activity,    # RENAMED from log_activity
+    log_document_activity,     # RENAMED from log_activity
     rename_document_file,      # SAME
     extract_client_ip,         # RENAMED from get_client_ip
     relocate_document_file,    # RENAMED from move_document_file

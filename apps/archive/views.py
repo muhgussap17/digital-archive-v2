@@ -57,7 +57,12 @@ from apps.accounts.permissions import IsStaffOrReadOnly
 from .models import Document, DocumentCategory, SPDDocument, DocumentActivity, Employee
 from .forms import DocumentFilterForm, DocumentForm, DocumentUpdateForm, SPDDocumentForm, SPDDocumentUpdateForm, EmployeeForm
 from .serializers import DocumentSerializer, CategorySerializer, SPDSerializer
-from .utils import log_activity, rename_document_file, get_client_ip, move_document_file
+from .utils import (
+    log_document_activity,    # RENAMED from log_activity
+    rename_document_file,      # SAME
+    extract_client_ip,         # RENAMED from get_client_ip
+    relocate_document_file,    # RENAMED from move_document_file
+)
 
 # ==================== KONFIGURASI LOGGING ====================
 # Setup logger untuk monitoring dan debugging
@@ -500,7 +505,7 @@ def document_create(request):
     - Menggunakan Django Forms untuk validasi
     - Transaction.atomic() untuk rollback jika error
     - Utility function rename_document_file() untuk penamaan
-    - Activity logging dengan log_activity() utils
+    - Activity logging dengan log_document_activity() utils
     
     Args:
         request (HttpRequest): Objek request (GET/POST)
@@ -557,7 +562,7 @@ def document_create(request):
                     rename_document_file(document)
                     
                     # Log aktivitas untuk audit trail
-                    log_activity(
+                    log_document_activity(
                         document=document,
                         user=request.user,
                         action_type='create',
@@ -656,7 +661,7 @@ def document_update(request, pk):
     Implementasi Standar:
     - Menggunakan DocumentUpdateForm (no file field)
     - Transaction atomic untuk data integrity
-    - move_document_file() untuk reorganisasi file
+    - relocate_document_file() untuk reorganisasi file
     
     Args:
         request (HttpRequest): Objek request
@@ -729,10 +734,10 @@ def document_update(request, pk):
                     
                     # Move dan rename file jika kategori/tanggal berubah
                     # File akan dipindah ke folder kategori yang baru
-                    move_document_file(updated_document)
+                    relocate_document_file(updated_document)
                     
                     # Log aktivitas
-                    log_activity(
+                    log_document_activity(
                         document=updated_document,
                         user=request.user,
                         action_type='update',
@@ -895,7 +900,7 @@ def document_delete(request, pk):
             document.save()
             
             # Log aktivitas untuk audit trail
-            log_activity(
+            log_document_activity(
                 document=document,
                 user=request.user,
                 action_type='delete',
@@ -1024,7 +1029,7 @@ def spd_create(request):
                     rename_document_file(document)
                     
                     # Log aktivitas
-                    log_activity(
+                    log_document_activity(
                         document=document,
                         user=request.user,
                         action_type='create',
@@ -1118,7 +1123,7 @@ def spd_update(request, pk):
     Implementasi Standar:
     - Menggunakan SPDDocumentUpdateForm (no file field)
     - Update Document dan SPDDocument dalam satu transaction
-    - move_document_file() untuk reorganisasi jika perlu
+    - relocate_document_file() untuk reorganisasi jika perlu
     
     Args:
         request (HttpRequest): Objek request
@@ -1186,10 +1191,10 @@ def spd_update(request, pk):
                     spd.save()
                     
                     # Move dan rename file jika ada perubahan metadata
-                    move_document_file(document)
+                    relocate_document_file(document)
                     
                     # Log aktivitas
-                    log_activity(
+                    log_document_activity(
                         document=document,
                         user=request.user,
                         action_type='update',
@@ -1343,7 +1348,7 @@ def spd_delete(request, pk):
             document.save()
             
             # Log aktivitas
-            log_activity(
+            log_document_activity(
                 document=document,
                 user=request.user,
                 action_type='delete',
@@ -1524,7 +1529,7 @@ def document_download(request, pk):
             return redirect('archive:document_list')
         
         # Log activity menggunakan utils
-        log_activity(
+        log_document_activity(
             document=document,
             user=request.user,
             action_type='download',
@@ -1610,7 +1615,7 @@ def document_preview(request, pk):
         
         # Optional: Log view activity
         # Uncomment jika ingin track views
-        # log_activity(
+        # log_document_activity(
         #     document=document,
         #     user=request.user,
         #     action_type='view',
@@ -1657,7 +1662,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         document = serializer.save(created_by=self.request.user)
         
         # Log activity
-        log_activity(
+        log_document_activity(
             document=document,
             user=self.request.user,
             action_type='create',
@@ -1668,7 +1673,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         document = serializer.save()
         
         # Log activity
-        log_activity(
+        log_document_activity(
             document=document,
             user=self.request.user,
             action_type='update',
@@ -1697,7 +1702,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         document = self.get_object()
         
         # Log activity
-        log_activity(
+        log_document_activity(
             document=document,
             user=request.user,
             action_type='download',

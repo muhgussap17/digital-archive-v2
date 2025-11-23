@@ -46,7 +46,7 @@ UPLOAD_BASE_DIR: str = "uploads"
 # Path format: uploads/category/YYYY/MM-MonthName/
 UPLOAD_PATH_FORMAT: str = "{base}/{category}/{year}/{month}/{filename}"
 
-# Month format for folder names (e.g., "01-January")
+# Month format for folder names (e.g., "01-Januari")
 MONTH_FOLDER_FORMAT: str = "%m-%B"
 
 # ==================== FILE SIZE FORMATTING ====================
@@ -196,7 +196,7 @@ DESTINATION_CHOICES: List[Tuple[str, str]] = [
 
 DESTINATION_OTHER_KEY: str = 'other'
 
-# ==================== DATE & TIME CONSTANTS ====================
+# ==================== DATE & TIME HELPER CLASSES ====================
 
 class IndonesianMonth:
     """
@@ -237,15 +237,15 @@ class IndonesianMonth:
     }
     
     @classmethod
-    def get_month_name(cls, month_number):
+    def get_month_name(cls, month_number: int) -> str:
         """
         Dapatkan nama bulan dalam Bahasa Indonesia
         
         Args:
-            month_number (int): Nomor bulan (1-12)
+            month_number: Nomor bulan (1-12)
             
         Returns:
-            str: Nama bulan (e.g., "Januari")
+            Nama bulan (e.g., "Januari")
             
         Raises:
             ValueError: Jika month_number tidak valid
@@ -255,17 +255,17 @@ class IndonesianMonth:
         return cls.MONTHS[month_number]
     
     @classmethod
-    def get_month_folder(cls, month_number):
+    def get_month_folder(cls, month_number: int) -> str:
         """
         Format folder bulan dengan prefix angka
         
         Args:
-            month_number (int): Nomor bulan (1-12)
+            month_number: Nomor bulan (1-12)
             
         Returns:
-            str: Format folder (e.g., "01-Januari")
+            Format folder (e.g., "01-Januari")
             
-        Example:
+        Examples:
             >>> IndonesianMonth.get_month_folder(1)
             '01-Januari'
             >>> IndonesianMonth.get_month_folder(12)
@@ -295,17 +295,17 @@ class DateFormat:
     # FOLDER_MONTH tidak pakai strftime, gunakan IndonesianMonth.get_month_folder()
     
     @staticmethod
-    def get_folder_path(date_obj):
+    def get_folder_path(date_obj) -> tuple:
         """
         Generate path folder dari date object
         
         Args:
-            date_obj (datetime.date): Tanggal dokumen
+            date_obj: Tanggal dokumen (datetime.date atau datetime.datetime)
             
         Returns:
-            tuple: (year, month_folder)
+            Tuple (year, month_folder)
             
-        Example:
+        Examples:
             >>> from datetime import date
             >>> d = date(2024, 1, 15)
             >>> DateFormat.get_folder_path(d)
@@ -314,3 +314,64 @@ class DateFormat:
         year = date_obj.strftime(DateFormat.FOLDER_YEAR)
         month_folder = IndonesianMonth.get_month_folder(date_obj.month)
         return year, month_folder
+
+
+class FilePathBuilder:
+    """
+    Helper untuk membangun file paths dengan konsisten
+    
+    Menyediakan utility functions untuk generate upload paths
+    yang mengikuti struktur folder standar aplikasi.
+    
+    Implementasi Standar:
+        - Mengikuti struktur: uploads/{category}/{year}/{month}/{filename}
+        - Menggunakan nama bulan dalam Bahasa Indonesia
+        - Konsisten dengan document_upload_path() di models.py
+    """
+    
+    @staticmethod
+    def build_upload_path(category_path: str, date_obj, filename: str) -> str:
+        """
+        Build full upload path untuk document
+        
+        Args:
+            category_path: Full category path (e.g., "belanjaan/atk")
+            date_obj: Tanggal dokumen
+            filename: Nama file dengan extension
+            
+        Returns:
+            Full relative path (e.g., "uploads/belanjaan/atk/2024/01-Januari/ATK_2024-01-15.pdf")
+            
+        Examples:
+            >>> from datetime import date
+            >>> path = FilePathBuilder.build_upload_path(
+            ...     "belanjaan/atk", 
+            ...     date(2024, 1, 15), 
+            ...     "ATK_2024-01-15.pdf"
+            ... )
+            >>> print(path)
+            uploads/belanjaan/atk/2024/01-Januari/ATK_2024-01-15.pdf
+        """
+        year, month_folder = DateFormat.get_folder_path(date_obj)
+        return f"{UPLOAD_BASE_DIR}/{category_path}/{year}/{month_folder}/{filename}"
+    
+    @staticmethod
+    def build_directory_path(category_path: str, date_obj) -> str:
+        """
+        Build directory path (tanpa filename)
+        
+        Args:
+            category_path: Full category path
+            date_obj: Tanggal dokumen
+            
+        Returns:
+            Directory path (e.g., "uploads/belanjaan/atk/2024/01-Januari")
+            
+        Examples:
+            >>> from datetime import date
+            >>> path = FilePathBuilder.build_directory_path("spd", date(2024, 1, 15))
+            >>> print(path)
+            uploads/spd/2024/01-Januari
+        """
+        year, month_folder = DateFormat.get_folder_path(date_obj)
+        return f"{UPLOAD_BASE_DIR}/{category_path}/{year}/{month_folder}"

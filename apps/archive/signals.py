@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.conf import settings
 from .models import Document, SPDDocument
-from .utils import rename_document_file, log_activity
+from .utils import rename_document_file, log_document_activity
 import os
 import logging
 

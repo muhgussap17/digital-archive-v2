@@ -18,7 +18,7 @@
         <!-- Table Body -->
         <tbody class="list">
             {% for document in page_obj %}
-            <tr class="document-row" data-document-id="{{ document.id }}">
+            <tr class="document-row" data-document-id="{{ document.id }}" style="cursor: pointer;">
                 <td class="font-weight-bold">
                     <i class="fa-solid fa-file-pdf fa-lg text-danger mr-2"></i> 
                     {{ document.get_filename }}
@@ -27,12 +27,7 @@
                     {{ document.created_by.username|truncate_chars:20 }}
                 </td>
                 <td class="date">
-                    {{ document.created_at|indo_date }}<br>
-                    {% if document.updated_at and document.updated_at|date:"U" > document.created_at|date:"U" %}
-                        <small class="text-danger">
-                            Dimodifikasi: {{ document.updated_at|indo_date:'datetime' }}
-                        </small>
-                    {% endif %}
+                    {{ document.created_at|indo_date_auto }}
                 </td>
                 <td class="size">
                     <span class="badge badge-default">

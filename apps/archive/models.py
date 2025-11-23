@@ -342,11 +342,11 @@ class SPDDocument(models.Model):
 class DocumentActivity(models.Model):
     """Audit trail for document activities"""
     ACTION_CHOICES = [
-        ('create', 'Dibuat'),
-        ('view', 'Dilihat'),
-        ('download', 'Diunduh'),
-        ('update', 'Diperbarui'),
-        ('delete', 'Dihapus'),
+        ('create', 'Membuat'),
+        ('view', 'Melihat'),
+        ('download', 'Mengunduh'),
+        ('update', 'Memperbarui'),
+        ('delete', 'Menghapus'),
     ]
     
     document = models.ForeignKey(

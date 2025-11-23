@@ -1,3 +1,201 @@
+"""
+Modul: constants.py
+Fungsi: Menyimpan semua konstanta aplikasi untuk konsistensi dan maintainability
+
+Implementasi Standar:
+    - Mengikuti PEP 8 untuk naming conventions (UPPER_CASE)
+    - Centralized configuration untuk mudah maintenance
+    - Type hints untuk better IDE support
+
+Catatan Pemeliharaan:
+    - Semua magic numbers dan strings harus didefinisikan di sini
+    - Jangan hardcode values di code, import dari file ini
+    - Update constants ini jika ada perubahan requirement
+"""
+
+from typing import List, Tuple
+
+# ==================== FILE UPLOAD SETTINGS ====================
+
+# Maximum file size (bytes)
+MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
+MAX_FILE_SIZE_MB: int = 10  # For display purposes
+
+# Allowed file extensions
+ALLOWED_FILE_EXTENSIONS: List[str] = ['pdf']
+
+# PDF file signature (magic bytes)
+PDF_FILE_SIGNATURE: bytes = b'%PDF'
+
+# ==================== FILE NAMING CONVENTIONS ====================
+
+# SPD filename format: SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf
+SPD_FILENAME_FORMAT: str = "SPD_{employee}_{destination}_{date}.pdf"
+
+# Document filename format: Kategori_YYYY-MM-DD.pdf
+DOCUMENT_FILENAME_FORMAT: str = "{category}_{date}.pdf"
+
+# Date format for filenames
+FILENAME_DATE_FORMAT: str = "%Y-%m-%d"
+
+# ==================== UPLOAD PATH STRUCTURE ====================
+
+# Base upload directory
+UPLOAD_BASE_DIR: str = "uploads"
+
+# Path format: uploads/category/YYYY/MM-MonthName/
+UPLOAD_PATH_FORMAT: str = "{base}/{category}/{year}/{month}/{filename}"
+
+# Month format for folder names (e.g., "01-January")
+MONTH_FOLDER_FORMAT: str = "%m-%B"
+
+# ==================== FILE SIZE FORMATTING ====================
+
+# Units for file size display
+FILE_SIZE_UNITS: List[str] = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+
+# Conversion factor (1024 bytes = 1 KB)
+FILE_SIZE_CONVERSION_FACTOR: int = 1024
+
+# ==================== DATE FORMATTING ====================
+
+# Indonesian month names (for display)
+INDONESIAN_MONTHS: dict = {
+    1: 'Januari', 2: 'Februari', 3: 'Maret', 4: 'April',
+    5: 'Mei', 6: 'Juni', 7: 'Juli', 8: 'Agustus',
+    9: 'September', 10: 'Oktober', 11: 'November', 12: 'Desember'
+}
+
+# Indonesian month names (short version)
+INDONESIAN_MONTHS_SHORT: dict = {
+    1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
+    5: 'Mei', 6: 'Jun', 7: 'Jul', 8: 'Agu',
+    9: 'Sep', 10: 'Okt', 11: 'Nov', 12: 'Des'
+}
+
+# Indonesian day names
+INDONESIAN_DAYS: dict = {
+    0: 'Senin', 1: 'Selasa', 2: 'Rabu', 3: 'Kamis',
+    4: 'Jumat', 5: 'Sabtu', 6: 'Minggu'
+}
+
+# ==================== ACTIVITY LOGGING ====================
+
+# Activity types (must match model choices)
+ACTIVITY_TYPE_CREATE: str = 'create'
+ACTIVITY_TYPE_VIEW: str = 'view'
+ACTIVITY_TYPE_DOWNLOAD: str = 'download'
+ACTIVITY_TYPE_UPDATE: str = 'update'
+ACTIVITY_TYPE_DELETE: str = 'delete'
+
+# Activity type choices (for validation)
+ACTIVITY_TYPES: List[str] = [
+    ACTIVITY_TYPE_CREATE,
+    ACTIVITY_TYPE_VIEW,
+    ACTIVITY_TYPE_DOWNLOAD,
+    ACTIVITY_TYPE_UPDATE,
+    ACTIVITY_TYPE_DELETE,
+]
+
+# ==================== REGEX PATTERNS ====================
+
+# Pattern untuk membersihkan filename (keep alphanumeric, spaces, hyphens)
+FILENAME_CLEAN_PATTERN: str = r'[^\w\s-]'
+
+# Pattern untuk menghapus multiple spaces/hyphens
+FILENAME_SPACES_PATTERN: str = r'[-\s]+'
+
+# ==================== ERROR MESSAGES ====================
+
+# File validation errors
+ERROR_INVALID_EXTENSION: str = "File harus berformat PDF"
+ERROR_FILE_TOO_LARGE: str = "Ukuran file maksimal {max_size} MB"
+ERROR_INVALID_PDF: str = "File bukan PDF yang valid"
+ERROR_FILE_NOT_FOUND: str = "File tidak ditemukan"
+
+# Document operation errors
+ERROR_DOCUMENT_NOT_FOUND: str = "Dokumen tidak ditemukan"
+ERROR_PERMISSION_DENIED: str = "Anda tidak memiliki akses untuk operasi ini"
+ERROR_UPLOAD_FAILED: str = "Gagal mengupload dokumen: {reason}"
+ERROR_DELETE_FAILED: str = "Gagal menghapus dokumen: {reason}"
+
+# ==================== SUCCESS MESSAGES ====================
+
+SUCCESS_DOCUMENT_UPLOADED: str = "Dokumen berhasil diupload"
+SUCCESS_DOCUMENT_UPDATED: str = "Dokumen berhasil diperbarui"
+SUCCESS_DOCUMENT_DELETED: str = "Dokumen berhasil dihapus"
+
+# ==================== CATEGORY SLUGS ====================
+
+# Primary category slugs (must match database)
+CATEGORY_SPD: str = 'spd'
+CATEGORY_BELANJAAN: str = 'belanjaan'
+
+# ==================== HTTP HEADERS ====================
+
+# AJAX request header
+AJAX_HEADER_NAME: str = 'HTTP_X_REQUESTED_WITH'
+AJAX_HEADER_VALUE: str = 'XMLHttpRequest'
+
+# Client info headers
+CLIENT_IP_HEADER: str = 'HTTP_X_FORWARDED_FOR'
+CLIENT_IP_FALLBACK: str = 'REMOTE_ADDR'
+USER_AGENT_HEADER: str = 'HTTP_USER_AGENT'
+
+# ==================== PAGINATION ====================
+
+# Default items per page
+PAGINATION_DEFAULT_PAGE_SIZE: int = 10
+PAGINATION_DOCUMENT_LIST_PAGE_SIZE: int = 5
+
+# ==================== BACKUP SETTINGS ====================
+
+# Backup retention period (days)
+BACKUP_RETENTION_DAYS: int = 30
+
+# Backup file format
+BACKUP_DATE_FORMAT: str = "%Y%m%d_%H%M%S"
+
+# ==================== VALIDATION RULES ====================
+
+# NIP validation
+NIP_LENGTH: int = 18  # Standard PNS NIP length
+
+# Document date validation
+DOCUMENT_DATE_MAX_FUTURE_DAYS: int = 0  # Cannot be in the future
+
+# ==================== DESTINATION CHOICES ====================
+
+# SPD destination choices (must match model)
+DESTINATION_CHOICES: List[Tuple[str, str]] = [
+    # Dalam Provinsi Kalimantan Timur
+    ('balikpapan', 'Balikpapan'),
+    ('samarinda', 'Samarinda'),
+    ('bontang', 'Bontang'),
+    ('kutai_kartanegara', 'Kutai Kartanegara'),
+    ('paser', 'Paser'),
+    ('berau', 'Berau'),
+    ('kutai_barat', 'Kutai Barat'),
+    ('kutai_timur', 'Kutai Timur'),
+    ('penajam_paser_utara', 'Penajam Paser Utara'),
+    ('mahakam_ulu', 'Mahakam Ulu'),
+    
+    # Luar Provinsi (Frequent destinations)
+    ('jakarta', 'Jakarta'),
+    ('surabaya', 'Surabaya'),
+    ('makassar', 'Makassar'),
+    ('banjarmasin', 'Banjarmasin'),
+    ('yogyakarta', 'Yogyakarta'),
+    ('bandung', 'Bandung'),
+    ('semarang', 'Semarang'),
+    ('denpasar', 'Denpasar'),
+    
+    # Other
+    ('other', 'Lainnya'),
+]
+
+DESTINATION_OTHER_KEY: str = 'other'
+
 # ==================== DATE & TIME CONSTANTS ====================
 
 class IndonesianMonth:

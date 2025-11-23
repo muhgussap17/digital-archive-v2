@@ -22,30 +22,23 @@
     <div class="col-12" id="mainContent">
         <div class="card shadow">
             <!-- Card Header -->
-            <div class="card-header border-0 bg-transparent">
+            <div class="card-header border-0 bg-transparent py-3">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h3 class="mb-0 d-inline-flex align-items-center">
-                            {% if current_category %}
-                                Dokumen {{ current_category.name }}
-                            {% else %}
-                                Semua Dokumen
-                            {% endif %}
+                        <h4 class="mb-0 d-inline-flex align-items-center">Dokumen SPD
                         <span class="badge badge-default badge-pill ml-2">{{ total_results }}</span>
-                        </h3>
+                        </h4>
                     </div>
-                    <div class="col-auto">
+                    <!-- <div class="col-auto">
                         <div class="btn-group" role="group">
-                            <!-- View Table -->
                             <button type="button" class="btn btn-sm btn-outline-default active" id="viewTable">
                                 <i class="fa-solid fa-table-list"></i>
                             </button>
-                            <!-- View Grid -->
                             <button type="button" class="btn btn-sm btn-outline-default" id="viewGrid">
                                 <i class="fa-solid fa-grip"></i>
                             </button>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             
@@ -55,31 +48,18 @@
     </div>
 </div>
 
-<!-- Include SPD Filter Modals -->
-{% include 'archive/modals/spd_filter_modal.html' %}
 {% endblock %}
 
-<!-- Detail Panel Future -->
-<!-- {% block detail_panel %}
-{% include 'archive/components/detail_panel.html' %}
-{% endblock %} -->
+{% block filter_modal %}
+<!-- Include SPD Filter Modals -->
+{% include 'archive/modals/spd_filter_modal.html' %}   
+{% endblock %}
 
 {% block extra_js %}
 <script>
 $(document).ready(function() {
     // Initialize tooltips
     $('[data-toggle="tooltip"]').tooltip();
-    
-    // Click row to show detail panel future
-    $('.document-row').on('click', function(e) {
-        // Ignore if clicking on buttons
-        if ($(e.target).closest('.btn').length) {
-            return;
-        }
-        
-        var documentId = $(this).data('document-id');
-        showDetailPanel(documentId);
-    });
     
     // View toggle (future feature)
     $('#viewTable').on('click', function() {
@@ -114,7 +94,7 @@ $(document).ready(function() {
             format: 'dd/mm/yyyy',
             autoclose: true,
             todayHighlight: true,
-            orientation: 'bottom auto',
+            orientation: 'top auto',
             language: 'id'
         });
     });

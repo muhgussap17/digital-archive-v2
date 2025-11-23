@@ -5,23 +5,19 @@
     {% for activity in activities %}
     <div class="timeline-block">
         <span class="timeline-step badge-default">
-            <i class="fa-solid fa-{{ activity.action_type|get_activity_icon }}"></i>
+            <i class="fa-solid fa-user"></i>
         </span>
         <div class="timeline-content">
-            <p class="text-sm text-gray-dark mb-0">
-                <strong>{{ activity.user.username|default:'System' }}</strong>
-                {{ activity.get_action_type_display|lower }}
-                {% if activity.description %}
-                <br>
-                <span class="text-muted">{{ activity.description|truncatechars:100 }}</span>
-                {% endif %}
+            <p class="text-sm text-gray-dark lh-130 mb-0">
+                {{ activity.user.full_name|default:'username' }}
+                {{ activity.get_action_type_display|lower }} dokumen
             </p>
-            <p class="text-xs text-gray-dark lh-100 mb-0">
+            <p class="text-xs text-gray-dark lh-160 mb-0">
                 {% now "Y" as current_year %}
                 {% if activity.created_at.year|stringformat:"s" == current_year %}
-                    {{ activity.created_at|date:"H.i d M" }}
+                    {{ activity.created_at|indo_date:'short_medium_time' }} 
                 {% else %}
-                    {{ activity.created_at|date:"d M Y, H.i" }}
+                    {{ activity.created_at|indo_date:'datetime' }}
                 {% endif %}
             </p>
         </div>

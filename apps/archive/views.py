@@ -339,7 +339,7 @@ def document_list(request, category_slug=None):
     #     print(f"{query['time']}s: {query['sql'][:100]}")
 
     context = {
-        'page_obj': Paginator(documents, 5).get_page(request.GET.get('page')),
+        'page_obj': Paginator(documents, 10).get_page(request.GET.get('page')),
         'current_category': current_category,
         'filter_form': filter_form,
         'total_results': documents.count(),
@@ -460,7 +460,7 @@ def spd_list(request):
     #     print(f"  {query['time']}s: {query['sql'][:100]}")
 
     context = {
-        'page_obj': Paginator(documents, 5).get_page(request.GET.get('page')),
+        'page_obj': Paginator(documents, 10).get_page(request.GET.get('page')),
         'current_category': DocumentCategory.objects.get(slug='spd'),
         'filter_form': filter_form,
         'total_results': documents.count(),
@@ -1402,6 +1402,7 @@ def document_detail(request, pk):
         return JsonResponse({
             'success': True,
             'document_name': document.get_display_name(),
+            'filename': document.get_filename(),
             'detail_html': detail_html
         })
         
@@ -1424,7 +1425,7 @@ def document_activities(request, pk):
     
     try:
         # Get activities (latest first)
-        activities = document.activities.select_related('user').order_by('-created_at')[:20]
+        activities = document.activities.select_related('user').order_by('-created_at')[:20] # type: ignore
         
         # Prepare context
         context = {
@@ -1432,25 +1433,43 @@ def document_activities(request, pk):
             'activities': activities,
         }
         
-        # Render activity HTML
-        activity_html = render_to_string(
-            'archive/includes/document_activity_content.html',
-            context,
-            request=request
-        )
+        # Render activity HTML dengan error handling
+        try:
+            activity_html = render_to_string(
+                'archive/includes/document_activity_content.html',
+                context,
+                request=request
+            )
+        except Exception as template_error:
+            logger.error(f'Template render error for activities {pk}: {str(template_error)}')
+            # Return fallback HTML
+            activity_html = f'''
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <p class="text-muted">Gagal render aktivitas</p>
+                    <small class="text-muted">{str(template_error)}</small>
+                </div>
+            '''
         
         return JsonResponse({
             'success': True,
             'activity_html': activity_html
         })
         
-    except Exception as e:
-        logger.error(f'Error loading document activities {pk}: {str(e)}')
+    except Document.DoesNotExist:
         return JsonResponse({
             'success': False,
-            'message': f'Gagal memuat aktivitas: {str(e)}'
+            'message': 'Dokumen tidak ditemukan'
+        }, status=404)
+    except Exception as e:
+        logger.error(f'Error loading document activities {pk}: {str(e)}')
+        import traceback
+        logger.error(traceback.format_exc())
+        return JsonResponse({
+            'success': False,
+            'message': f'Server error: {str(e)}'
         }, status=500)
-    
+
 
 @login_required
 def document_download(request, pk):

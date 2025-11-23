@@ -14,6 +14,8 @@
     </div>
 </div>
 
+<hr class="mt-1 mb-4">
+
 <!-- Detail File -->
 <div class="row">
     <div class="col">
@@ -35,18 +37,15 @@
         
         {% if document.updated_at and document.updated_at|date:"U" > document.created_at|date:"U" %}
         <small class="font-weight-600 text-gray-dark">Dimodifikasi</small>
-        <p class="text-sm lh-130 mb-3">
+        <p class="text-sm lh-130 mb-3 text-truncate">
             {{ document.updated_at|indo_date:'datetime' }}
-            <br>
-            <span class="text-xs lh-100 text-muted">oleh {{ document.created_by.username }}</span>
+            <span class="text-sm">oleh {{ document.created_by.username }}</span>
         </p>
         {% endif %}
         
         <small class="font-weight-600 text-gray-dark">Dibuat</small>
         <p class="text-sm lh-130 mb-3">
-            {{ document.created_at|indo_date:'datetime' }}
-            <br>
-            <span class="text-xs lh-100 text-muted">oleh {{ document.created_by.username }}</span>
+            {{ document.created_at|indo_date:'medium' }}
         </p>
         
         <!-- <small class="font-weight-600 text-gray-dark">Versi</small>
@@ -81,16 +80,16 @@
             <small class="font-weight-600 text-gray-dark">Tanggal Perjalanan Dinas</small>
             <p class="text-sm lh-130 mb-3">
                 {% if document.spd_info.start_date == document.spd_info.end_date %}
-                    {{ document.spd_info.start_date|indo_date }}
+                    {{ document.spd_info.start_date|indo_date:'medium' }}
                 {% else %}
-                    {{ document.spd_info.start_date|indo_date }} s/d {{ document.spd_info.end_date|indo_date }}
+                    {{ document.spd_info.start_date|indo_date:'medium' }} s/d {{ document.spd_info.end_date|indo_date:'medium' }}
                 {% endif %}
                 <br>
-                <span class="text-muted">({{ document.spd_info.get_duration_days }} hari)</span>
+                <!-- <span class="text-muted">({{ document.spd_info.get_duration_days }} hari)</span> -->
             </p>
             
             <small class="font-weight-600 text-gray-dark">Tanggal Dokumen SPD</small>
-            <p class="text-sm lh-130 mb-3">{{ document.document_date|indo_date }}</p>
+            <p class="text-sm lh-130 mb-3">{{ document.document_date|indo_date:'medium' }}</p>
         
         {% else %}
             <!-- Regular Document (Belanjaan) -->
@@ -103,7 +102,7 @@
             {% endif %}
             
             <small class="font-weight-600 text-gray-dark">Tanggal Dokumen</small>
-            <p class="text-sm lh-130 mb-3">{{ document.document_date|indo_date }}</p>
+            <p class="text-sm lh-130 mb-3">{{ document.document_date|indo_date:'medium' }}</p>
         {% endif %}
     </div>
 </div>

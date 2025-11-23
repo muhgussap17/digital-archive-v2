@@ -103,6 +103,8 @@
     {% include 'archive/modals/document_modal.html' %}
     {% include 'archive/modals/spd_modal.html' %}
     
+    {% block filter_modal %}{% endblock %}
+            
     <!-- Core JS -->
     <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>

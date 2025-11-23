@@ -70,10 +70,20 @@ def indo_date(value, format_string='long'):
         month_name = INDONESIAN_MONTHS_SHORT.get(value.month, value.strftime('%b'))
         return f"{value.day} {month_name} {value.year}"
     
-    elif format_string == 'datetime':
-        # Format: 15 Jan 2024 14:30
+    elif format_string == 'short_medium':
+        # Format: 15 Jan
         month_name = INDONESIAN_MONTHS_SHORT.get(value.month, value.strftime('%b'))
-        return f"{value.day} {month_name} {value.year} {value.strftime('%H:%M')}"
+        return f"{value.day} {month_name}"
+    
+    elif format_string == 'short_medium_time':
+        # Format: 14:30 15 Jan
+        month_name = INDONESIAN_MONTHS_SHORT.get(value.month, value.strftime('%b'))
+        return f"{value.strftime('%H:%M')} {value.day} {month_name}"
+    
+    elif format_string == 'datetime':
+        # Format: 15 Jan 2024, 14:30
+        month_name = INDONESIAN_MONTHS_SHORT.get(value.month, value.strftime('%b'))
+        return f"{value.day} {month_name} {value.year}, {value.strftime('%H:%M')}"
     
     elif format_string == 'full':
         # Format: Senin, 15 Januari 2024
@@ -90,6 +100,33 @@ def indo_date(value, format_string='long'):
         month_name = INDONESIAN_MONTHS.get(value.month, value.strftime('%B'))
         return f"{value.day} {month_name} {value.year}"
 
+
+@register.filter
+def indo_date_auto(value):
+    """
+    Format otomatis berdasarkan tahun:
+    - Jika tahun sama -> short_medium (contoh: 21 Nov)
+    - Jika tahun berbeda -> medium (contoh: 21 Nov 2023)
+    """
+    if not value:
+        return ''
+
+    now_year = timezone.now().year
+    value_year = value.year
+
+    # Deteksi apakah value adalah date saja (tanpa time)
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        value = datetime.datetime.combine(value, datetime.time.min)
+
+    # Pastikan timezone-aware
+    if timezone.is_aware(value):
+        value = timezone.localtime(value)
+
+    if value_year == now_year:
+        return indo_date(value, 'short_medium')
+    else:
+        return indo_date(value, 'medium')
+    
 
 @register.filter
 def time_since(value):

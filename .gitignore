@@ -81,3 +81,5 @@ logs/
 *.exe
 *.o
 *.so
+
+initial_employees.json

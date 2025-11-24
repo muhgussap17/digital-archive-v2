@@ -22,6 +22,11 @@ from .dashboard_views import (
     search_documents,
 )
 
+# Test Views
+from .test_views import (
+    test,
+)
+
 # Document CRUD Views (Refactored)
 from .document_views import (
     document_create,
@@ -58,6 +63,9 @@ __all__ = [
     'document_list',
     'spd_list',
     'search_documents',
+
+    # Testing
+    'test',
     
     # Document CRUD
     'document_create',

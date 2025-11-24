@@ -18,7 +18,7 @@ class AuditLogMiddleware(MiddlewareMixin):
             logger.info(
                 f"Request: {request.method} {request.path} | "
                 f"User: {request.user.username} | "
-                f"IP: {self.extract_client_ip(request)}" # type: ignore
+                f"IP: {extract_client_ip(request)}" # type: ignore
             )
         return None
     

@@ -82,4 +82,4 @@ logs/
 *.o
 *.so
 
-initial_employees.json
+apps/archive/fixtures/initial_employees.json

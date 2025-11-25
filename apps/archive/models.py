@@ -245,6 +245,14 @@ class Document(models.Model):
     def get_filename(self):
         """Return only the filename without path"""
         return os.path.basename(self.file.name)
+    
+    @property
+    def document_type_slug(self):
+        """Returns 'spd' or 'document' based on type"""
+        # Memeriksa keberadaan relasi OneToOneField ke SPDDocument
+        if hasattr(self, 'spd_info'):
+            return 'spd'
+        return 'document'
 
 
 class SPDDocument(models.Model):

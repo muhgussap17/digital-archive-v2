@@ -2,7 +2,6 @@
     <!-- Download -->
     <a href="{% url 'archive:document_download' document.id %}" 
         class="dropdown-item text-default" 
-        target="_blank" 
         data-toggle="tooltip">
         <i class="fa-solid fa-download"></i>Download
     </a>
@@ -10,6 +9,7 @@
     <a class="dropdown-item text-default"
         data-action="{% if has_spd %}edit-spd{% else %}edit-document{% endif %}"
         data-document-id="{{ document.id }}"
+        data-document-type="{{ document.document_type_slug }}"
         data-toggle="tooltip">
         <i class="fa-solid fa-pen"></i>Edit
     </a>
@@ -33,9 +33,9 @@
 
     <!-- Delete (Staff Only) -->
     <a class="dropdown-item text-default"
-        data-action="delete-document"
+        data-action="{% if has_spd %}delete-spd{% else %}delete-document{% endif %}"
         data-document-id="{{ document.id }}"
-        data-document-type="{% if has_spd %}spd{% else %}document{% endif %}"
+        data-file-name="{{ document.get_filename }}"
         data-toggle="tooltip">
         <i class="fa-solid fa-trash"></i>Delete
     </a>

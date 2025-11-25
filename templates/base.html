@@ -77,17 +77,19 @@
         <div class="container-fluid mt--6">
             
             <!-- Messages -->
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
-                    <span class="alert-icon"><i class="fa-solid fa-circle-info"></i></span>
-                    <span class="alert-text">{{ message }}</span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                {% endfor %}
-            {% endif %}
+            <div id="django-messages-container" style="display: none;">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert" data-type="{{ message.tags }}" data-message="{{ message }}">
+                        <span class="alert-icon"><i class="fa-solid fa-circle-info"></i></span>
+                        <span class="alert-text">{{ message }}</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
             
             <div class="page-content">
                 <!-- Main Content -->

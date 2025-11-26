@@ -44,6 +44,7 @@ Cara Penggunaan:
 
 from typing import Optional, Dict, Any
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.contrib import messages
@@ -373,7 +374,6 @@ class AjaxHandler:
             ...     redirect_url='archive:document_list'
             ... )
         """
-        from django.shortcuts import redirect
         
         if AjaxHandler.is_ajax(request):
             if success:

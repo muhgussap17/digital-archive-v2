@@ -62,7 +62,7 @@ class DocumentForm(CategoryFieldMixin, DateFieldMixin, FileFieldMixin, BaseDocum
         - Clean separation of concerns
     """
     
-    class Meta:
+    class Meta: # type: ignore
         model = Document
         fields = ['category', 'document_date', 'file']
 
@@ -95,6 +95,6 @@ class DocumentUpdateForm(CategoryFieldMixin, DateFieldMixin, BaseDocumentForm):
         - Reuse validation dari mixins
     """
     
-    class Meta:
+    class Meta: # type: ignore
         model = Document
         fields = ['category', 'document_date']  # NO FILE!

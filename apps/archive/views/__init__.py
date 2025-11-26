@@ -23,7 +23,7 @@ from .dashboard_views import (
 )
 
 # Test Views
-from .test_views import (
+from .testing_views import (
     test,
 )
 

@@ -101,7 +101,7 @@ class DateFieldMixin:
         super().__init__(*args, **kwargs)
         
         # Add document_date field
-        self.fields['document_date'] = forms.DateField(
+        self.fields['document_date'] = forms.DateField( # type: ignore
             widget=forms.DateInput(attrs={
                 **DATEPICKER_ATTRS,
                 'placeholder': self.document_date_placeholder,
@@ -121,7 +121,7 @@ class DateFieldMixin:
         Raises:
             ValidationError: Jika tanggal melebihi hari ini
         """
-        document_date = self.cleaned_data.get('document_date')
+        document_date = self.cleaned_data.get('document_date') # type: ignore
         
         if document_date and document_date > date.today():
             raise ValidationError('Tanggal dokumen tidak boleh melebihi hari ini.')
@@ -157,7 +157,7 @@ class DateRangeFieldMixin:
         super().__init__(*args, **kwargs)
         
         # Add start_date field
-        self.fields['start_date'] = forms.DateField(
+        self.fields['start_date'] = forms.DateField( # type: ignore
             widget=forms.DateInput(attrs={
                 **DATEPICKER_ATTRS,
                 'placeholder': 'Tanggal Mulai',
@@ -168,7 +168,7 @@ class DateRangeFieldMixin:
         )
         
         # Add end_date field
-        self.fields['end_date'] = forms.DateField(
+        self.fields['end_date'] = forms.DateField( # type: ignore
             widget=forms.DateInput(attrs={
                 **DATEPICKER_ATTRS,
                 'placeholder': 'Tanggal Selesai',
@@ -199,7 +199,7 @@ class DateRangeValidationMixin:
     
     def clean_start_date(self):
         """Validasi start_date tidak di masa depan"""
-        start_date = self.cleaned_data.get('start_date')
+        start_date = self.cleaned_data.get('start_date') # type: ignore
         
         if start_date and start_date > date.today():
             raise ValidationError('Tanggal mulai tidak boleh melebihi hari ini.')
@@ -208,7 +208,7 @@ class DateRangeValidationMixin:
     
     def clean_end_date(self):
         """Validasi end_date tidak di masa depan"""
-        end_date = self.cleaned_data.get('end_date')
+        end_date = self.cleaned_data.get('end_date') # type: ignore
         
         if end_date and end_date > date.today():
             raise ValidationError('Tanggal selesai tidak boleh melebihi hari ini.')
@@ -217,7 +217,7 @@ class DateRangeValidationMixin:
     
     def clean(self):
         """Validasi end_date >= start_date"""
-        cleaned_data = super().clean()
+        cleaned_data = super().clean() # type: ignore
         
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
@@ -266,7 +266,7 @@ class FileFieldMixin:
         super().__init__(*args, **kwargs)
         
         # Add file field
-        self.fields['file'] = forms.FileField(
+        self.fields['file'] = forms.FileField( # type: ignore
             widget=forms.FileInput(attrs=FILE_INPUT_ATTRS),
             label=self.file_label,
             help_text=self.file_help_text,
@@ -285,12 +285,12 @@ class FileFieldMixin:
         """
         from ..utils import validate_pdf_file
         
-        file = self.cleaned_data.get('file')
+        file = self.cleaned_data.get('file') # type: ignore
         
         if file:
             is_valid, error_msg = validate_pdf_file(file)
             if not is_valid:
-                raise ValidationError(error_msg)
+                raise ValidationError(error_msg) # type: ignore
         
         return file
 
@@ -326,7 +326,7 @@ class EmployeeFieldMixin:
         super().__init__(*args, **kwargs)
         
         # Add employee field
-        self.fields['employee'] = forms.ModelChoiceField(
+        self.fields['employee'] = forms.ModelChoiceField( # type: ignore
             queryset=Employee.objects.filter(is_active=True),
             empty_label="Pilih Pegawai",
             widget=forms.Select(attrs=SELECT_ATTRS),
@@ -366,7 +366,7 @@ class DestinationFieldMixin:
         super().__init__(*args, **kwargs)
         
         # Add destination field
-        self.fields['destination'] = forms.ChoiceField(
+        self.fields['destination'] = forms.ChoiceField( # type: ignore
             choices=SPDDocument.DESTINATION_CHOICES,
             widget=forms.Select(attrs={
                 **SELECT_ATTRS,
@@ -377,7 +377,7 @@ class DestinationFieldMixin:
         )
         
         # Add destination_other field
-        self.fields['destination_other'] = forms.CharField(
+        self.fields['destination_other'] = forms.CharField( # type: ignore
             max_length=255,
             required=False,
             widget=forms.TextInput(attrs={
@@ -398,7 +398,7 @@ class DestinationFieldMixin:
         Raises:
             ValidationError: Jika destination='other' tapi destination_other kosong
         """
-        cleaned_data = super().clean()
+        cleaned_data = super().clean() # type: ignore
         
         destination = cleaned_data.get('destination')
         destination_other = cleaned_data.get('destination_other')
@@ -440,7 +440,7 @@ class CategoryFieldMixin:
         super().__init__(*args, **kwargs)
         
         # Add category field (only subcategories)
-        self.fields['category'] = forms.ModelChoiceField(
+        self.fields['category'] = forms.ModelChoiceField( # type: ignore
             queryset=DocumentCategory.objects.filter(parent__isnull=False),
             empty_label=" Pilih Kategori ",
             widget=forms.Select(attrs=SELECT_ATTRS),
@@ -458,7 +458,7 @@ class CategoryFieldMixin:
         Raises:
             ValidationError: Jika category adalah SPD
         """
-        category = self.cleaned_data.get('category')
+        category = self.cleaned_data.get('category') # type: ignore
         
         if category and category.slug == 'spd':
             raise ValidationError('Untuk dokumen SPD, gunakan form khusus SPD')

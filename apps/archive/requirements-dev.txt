@@ -1,0 +1,135 @@
+# requirements-dev.txt
+# Development dan Testing Dependencies untuk Sistem Arsip Digital
+#
+# Install: pip install -r requirements-dev.txt
+#
+# Struktur:
+# 1. Testing Framework
+# 2. Coverage & Quality Tools
+# 3. Test Data Generation
+# 4. Development Utilities
+
+# ==================== TESTING FRAMEWORK ====================
+
+# Pytest - Testing framework
+pytest
+
+# Pytest-Django - Django integration untuk pytest
+pytest-django
+
+# Pytest-xdist - Parallel test execution
+pytest-xdist
+
+# Pytest-cov - Coverage plugin untuk pytest
+pytest-cov
+
+# Pytest-randomly - Randomize test order untuk catch hidden dependencies
+pytest-randomly
+
+# Pytest-timeout - Timeout untuk long-running tests
+pytest-timeout
+
+# Pytest-mock - Mocking utilities
+pytest-mock
+
+# ==================== COVERAGE & QUALITY TOOLS ====================
+
+# Coverage - Code coverage measurement
+coverage[toml]
+
+# Coverage-badge - Generate coverage badge
+coverage-badge
+
+# Flake8 - Code linting
+flake8
+
+# Flake8-django - Django-specific linting
+flake8-django
+
+# Black - Code formatter
+black
+
+# Isort - Import sorting
+isort
+
+# Mypy - Static type checker
+mypy
+django-stubs
+
+# Pylint - Advanced linting
+pylint
+pylint-django
+
+# ==================== TEST DATA GENERATION ====================
+
+# Factory Boy - Test fixtures replacement
+factory-boy
+
+# Faker - Generate fake data
+Faker
+
+# Model Bakery - Alternative test data generator
+model-bakery
+
+# ==================== DEVELOPMENT UTILITIES ====================
+
+# IPython - Enhanced Python shell
+ipython
+
+# Django Debug Toolbar - Development debugging
+django-debug-toolbar
+
+# Django Extensions - Extra management commands
+django-extensions
+
+# Werkzeug - Development server with debugging
+Werkzeug
+
+# ==================== DATABASE UTILITIES ====================
+
+# SQLParse - SQL formatting
+sqlparse
+
+# ==================== API TESTING ====================
+
+# Requests - HTTP library untuk API testing
+requests
+
+# Responses - Mock HTTP requests
+responses
+
+# ==================== OPTIONAL ENHANCEMENTS ====================
+
+# Pytest-watch - Auto-run tests on file changes
+# pytest-watch==4.2.0
+
+# Pytest-html - HTML test reports
+# pytest-html==4.1.1
+
+# Pytest-json-report - JSON test reports
+# pytest-json-report==1.5.0
+
+# ==================== NOTES ====================
+#
+# Quick Commands:
+# - Run all tests: pytest
+# - Run with coverage: pytest --cov
+# - Run specific test: pytest apps/archive/tests/unit/test_file.py
+# - Run marked tests: pytest -m unit
+# - Parallel execution: pytest -n auto
+# - Watch mode: ptw  (if pytest-watch installed)
+#
+# Coverage Report:
+# - Terminal: pytest --cov --cov-report=term-missing
+# - HTML: pytest --cov --cov-report=html
+# - Open report: open htmlcov/index.html
+#
+# Code Quality:
+# - Format code: black apps/
+# - Sort imports: isort apps/
+# - Lint code: flake8 apps/
+# - Type check: mypy apps/
+#
+# Performance:
+# - Profile tests: pytest --profile
+# - Slow tests: pytest --durations=10

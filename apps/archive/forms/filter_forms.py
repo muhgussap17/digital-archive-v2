@@ -111,7 +111,7 @@ class DocumentFilterForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         # Populate destination choices
-        self.fields['destination'].choices = [
+        self.fields['destination'].choices = [ # type: ignore
             ('', 'Semua Tujuan')
         ] + list(SPDDocument.DESTINATION_CHOICES)
         

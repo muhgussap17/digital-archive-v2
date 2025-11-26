@@ -146,8 +146,8 @@ Setelah login sebagai superuser:
 2. Pilih kategori (ATK, Konsumsi, BBM, dll)
 3. Isi tanggal dokumen
 4. Upload file PDF
-5. Judul dokumen akan otomatis: `Kategori - DD MMMM YYYY` # Ditangani pada fungsi get_display_name() pada models.py
-6. File akan dinamai: `Kategori_YYYY-MM-DD.pdf` # Ditangani pada fungsi rename_document_file utils.py
+5. Judul dokumen akan otomatis: `Kategori - DD MMMM YYYY` # Ditangani oleh get_display_name() pada models.py
+6. File akan dinamai: `Kategori_YYYY-MM-DD.pdf` # Ditangani oleh document_upload_path() pada models.py
 
 ### Upload Dokumen SPD
 
@@ -156,13 +156,13 @@ Setelah login sebagai superuser:
 3. Pilih tujuan perjalanan
 4. Isi tanggal mulai dan selesai
 5. Upload file PDF
-6. Judul dokumen akan otomatis: `SPD - NamaPegawai - Tujuan (DD MMMM YYYY)` # Ditangani pada fungsi get_display_name() pada models.py
-7. File akan dinamai: `SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf`# Ditangani pada fungsi rename_document_file utils.py
+6. Judul dokumen akan otomatis: `SPD - NamaPegawai - Tujuan (DD MMMM YYYY)` # Ditangani oleh get_display_name() pada models.py
+7. File akan dinamai: `SPD_NamaPegawai_Tujuan_YYYY-MM-DD.pdf`# Ditangani oleh rename_document_file() pada utils/file_operations.py
 
 ## 🔍 Pencarian & Filter
 
 - **Search Bar:** Cari berdasarkan nama pegawai, tujuan, atau kategori
-- **Filter Kategori:** Sidebar menu kategori
+- **Filter Kategori:** Modal kategori
 - **Filter Tanggal:** Range tanggal dokumen
 - **Filter Pegawai:** Khusus untuk dokumen SPD
 

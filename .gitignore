@@ -82,4 +82,5 @@ logs/
 *.o
 *.so
 
+apps/archive/backups/*.py.backup
 apps/archive/fixtures/initial_employees.json

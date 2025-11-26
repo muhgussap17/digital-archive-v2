@@ -107,7 +107,7 @@ python manage.py migrate
 
 ```bash
 python manage.py loaddata initial_categories.json
-python manage.py loaddata initial_employees.json
+python manage.py loaddata initial_employees.json # Jika ada
 ```
 
 ### 9. Buat Superuser

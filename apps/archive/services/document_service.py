@@ -105,7 +105,7 @@ class DocumentService:
             >>> document = DocumentService.create_document(
             ...     form_data={
             ...         'category': category_obj,
-            ...         'document_date': date(2024, 1, 15)
+            ...         'document_date': date(2025, 1, 15)
             ...     },
             ...     file=uploaded_file,
             ...     user=request.user,
@@ -286,7 +286,7 @@ class DocumentService:
         Examples:
             >>> docs = DocumentService.get_active_documents({
             ...     'category': category,
-            ...     'date_from': date(2024, 1, 1)
+            ...     'date_from': date(2025, 1, 1)
             ... })
         """
         from django.db.models import Q

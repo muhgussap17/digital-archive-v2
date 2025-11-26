@@ -121,7 +121,7 @@ def document_upload_path(instance, filename):
     Generate upload path berdasarkan kategori dan tanggal
     
     Format path: uploads/{category_path}/{year}/{month}/{filename}
-    Contoh: uploads/belanjaan/atk/2024/01-Januari/ATK_2024-01-15.pdf
+    Contoh: uploads/belanjaan/atk/2025/01-Januari/ATK_2025-01-15.pdf
     
     Args:
         instance: Document instance

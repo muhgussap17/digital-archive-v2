@@ -39,10 +39,10 @@ def indo_date(value, format_string='long'):
     Format tanggal ke format Indonesia.
     
     Usage:
-        {{ document.document_date|indo_date }}  -> 15 Januari 2024
-        {{ document.document_date|indo_date:'short' }}  -> 15/01/2024
-        {{ document.created_at|indo_date:'datetime' }}  -> 15 Jan 2024 14:30
-        {{ document.document_date|indo_date:'full' }}  -> Senin, 15 Januari 2024
+        {{ document.document_date|indo_date }}  -> 15 Januari 2025
+        {{ document.document_date|indo_date:'short' }}  -> 15/01/2025
+        {{ document.created_at|indo_date:'datetime' }}  -> 15 Jan 2025 14:30
+        {{ document.document_date|indo_date:'full' }}  -> Senin, 15 Januari 2025
     """
     if not value:
         return ''
@@ -57,16 +57,16 @@ def indo_date(value, format_string='long'):
         value = timezone.localtime(value)
     
     if format_string == 'long':
-        # Format: 15 Januari 2024
+        # Format: 15 Januari 2025
         month_name = INDONESIAN_MONTHS.get(value.month, value.strftime('%B'))
         return f"{value.day} {month_name} {value.year}"
     
     elif format_string == 'short':
-        # Format: 15/01/2024
+        # Format: 15/01/2025
         return value.strftime('%d/%m/%Y')
     
     elif format_string == 'medium':
-        # Format: 15 Jan 2024
+        # Format: 15 Jan 2025
         month_name = INDONESIAN_MONTHS_SHORT.get(value.month, value.strftime('%b'))
         return f"{value.day} {month_name} {value.year}"
     
@@ -81,12 +81,12 @@ def indo_date(value, format_string='long'):
         return f"{value.strftime('%H:%M')} {value.day} {month_name}"
     
     elif format_string == 'datetime':
-        # Format: 15 Jan 2024, 14:30
+        # Format: 15 Jan 2025, 14:30
         month_name = INDONESIAN_MONTHS_SHORT.get(value.month, value.strftime('%b'))
         return f"{value.day} {month_name} {value.year}, {value.strftime('%H:%M')}"
     
     elif format_string == 'full':
-        # Format: Senin, 15 Januari 2024
+        # Format: Senin, 15 Januari 2025
         day_name = INDONESIAN_DAYS.get(value.weekday(), value.strftime('%A'))
         month_name = INDONESIAN_MONTHS.get(value.month, value.strftime('%B'))
         return f"{day_name}, {value.day} {month_name} {value.year}"
@@ -212,7 +212,7 @@ def month_year(value):
     Format date to month and year only
     
     Usage:
-        {{ document.document_date|month_year }}  -> Januari 2024
+        {{ document.document_date|month_year }}  -> Januari 2025
     """
     if not value:
         return ''

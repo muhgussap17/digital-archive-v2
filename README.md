@@ -215,7 +215,7 @@ python manage.py cleanup_deleted --days 90
 python manage.py generate_report
 
 # Laporan bulan tertentu
-python manage.py generate_report --month 2024-01 --output report_jan2024.csv
+python manage.py generate_report --month 2025-01 --output report_jan2025.csv
 ```
 
 ## 🚀 Deployment (Production)
@@ -307,15 +307,15 @@ API endpoint tersedia di: `http://localhost:8000/api/`
 
 ### SPD:
 ```
-SPD_JohnDoe_Jakarta_2024-01-15.pdf
-SPD_JaneSmith_Surabaya_2024-02-20.pdf
+SPD_JohnDoe_Jakarta_2025-01-15.pdf
+SPD_JaneSmith_Surabaya_2025-02-20.pdf
 ```
 
 ### Belanjaan:
 ```
-ATK_2024-01-15.pdf
-Konsumsi_2024-01-20.pdf
-BBM_2024-01-25.pdf
+ATK_2025-01-15.pdf
+Konsumsi_2025-01-20.pdf
+BBM_2025-01-25.pdf
 ```
 
 ## 🗂️ Struktur Folder Upload
@@ -323,16 +323,16 @@ BBM_2024-01-25.pdf
 ```
 media/uploads/
 ├── spd/
-│   └── 2024/
+│   └── 2025/
 │       ├── 01-Januari/
-│       │   └── SPD_JohnDoe_Jakarta_2024-01-15.pdf
+│       │   └── SPD_JohnDoe_Jakarta_2025-01-15.pdf
 │       └── 02-February/
-│           └── SPD_JaneSmith_Surabaya_2024-02-05.pdf
+│           └── SPD_JaneSmith_Surabaya_2025-02-05.pdf
 └── belanjaan/
     ├── atk/
-    │   └── 2024/
+    │   └── 2025/
     │       └── 01-Januari/
-    │           └── ATK_2024-01-10.pdf
+    │           └── ATK_2025-01-10.pdf
     ├── konsumsi/
     └── bbm/
 ```

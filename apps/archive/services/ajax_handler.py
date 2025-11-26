@@ -335,7 +335,7 @@ class AjaxHandler:
         Examples:
             >>> return AjaxHandler.detail_response({
             ...     'success': True,
-            ...     'document_name': 'ATK 2024-01-15',
+            ...     'document_name': 'ATK 2025-01-15',
             ...     'detail_html': '<div>...</div>'
             ... })
         """

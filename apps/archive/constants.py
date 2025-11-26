@@ -283,15 +283,15 @@ class DateFormat:
     """
     
     # Display formats (untuk template)
-    DISPLAY_LONG = 'd F Y'  # 15 Januari 2024 (menggunakan Indonesian locale)
-    DISPLAY_SHORT = 'd/m/Y'  # 15/01/2024
-    DISPLAY_MEDIUM = 'd M Y'  # 15 Jan 2024
+    DISPLAY_LONG = 'd F Y'  # 15 Januari 2025 (menggunakan Indonesian locale)
+    DISPLAY_SHORT = 'd/m/Y'  # 15/01/2025
+    DISPLAY_MEDIUM = 'd M Y'  # 15 Jan 2025
     
     # File naming formats
-    FILE_NAME = '%Y-%m-%d'  # 2024-01-15
+    FILE_NAME = '%Y-%m-%d'  # 2025-01-15
     
     # Folder naming formats
-    FOLDER_YEAR = '%Y'  # 2024
+    FOLDER_YEAR = '%Y'  # 2025
     # FOLDER_MONTH tidak pakai strftime, gunakan IndonesianMonth.get_month_folder()
     
     @staticmethod
@@ -307,9 +307,9 @@ class DateFormat:
             
         Examples:
             >>> from datetime import date
-            >>> d = date(2024, 1, 15)
+            >>> d = date(2025, 1, 15)
             >>> DateFormat.get_folder_path(d)
-            ('2024', '01-Januari')
+            ('2025', '01-Januari')
         """
         year = date_obj.strftime(DateFormat.FOLDER_YEAR)
         month_folder = IndonesianMonth.get_month_folder(date_obj.month)
@@ -340,17 +340,17 @@ class FilePathBuilder:
             filename: Nama file dengan extension
             
         Returns:
-            Full relative path (e.g., "uploads/belanjaan/atk/2024/01-Januari/ATK_2024-01-15.pdf")
+            Full relative path (e.g., "uploads/belanjaan/atk/2025/01-Januari/ATK_2025-01-15.pdf")
             
         Examples:
             >>> from datetime import date
             >>> path = FilePathBuilder.build_upload_path(
             ...     "belanjaan/atk", 
-            ...     date(2024, 1, 15), 
-            ...     "ATK_2024-01-15.pdf"
+            ...     date(2025, 1, 15), 
+            ...     "ATK_2025-01-15.pdf"
             ... )
             >>> print(path)
-            uploads/belanjaan/atk/2024/01-Januari/ATK_2024-01-15.pdf
+            uploads/belanjaan/atk/2025/01-Januari/ATK_2025-01-15.pdf
         """
         year, month_folder = DateFormat.get_folder_path(date_obj)
         return f"{UPLOAD_BASE_DIR}/{category_path}/{year}/{month_folder}/{filename}"
@@ -365,13 +365,13 @@ class FilePathBuilder:
             date_obj: Tanggal dokumen
             
         Returns:
-            Directory path (e.g., "uploads/belanjaan/atk/2024/01-Januari")
+            Directory path (e.g., "uploads/belanjaan/atk/2025/01-Januari")
             
         Examples:
             >>> from datetime import date
-            >>> path = FilePathBuilder.build_directory_path("spd", date(2024, 1, 15))
+            >>> path = FilePathBuilder.build_directory_path("spd", date(2025, 1, 15))
             >>> print(path)
-            uploads/spd/2024/01-Januari
+            uploads/spd/2025/01-Januari
         """
         year, month_folder = DateFormat.get_folder_path(date_obj)
         return f"{UPLOAD_BASE_DIR}/{category_path}/{year}/{month_folder}"

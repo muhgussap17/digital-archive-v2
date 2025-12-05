@@ -85,3 +85,5 @@ logs/
 apps/archive/backups/*.py.backup
 apps/archive/backups/*.html.backup
 apps/archive/fixtures/initial_employees.json
+
+commit_message.txt

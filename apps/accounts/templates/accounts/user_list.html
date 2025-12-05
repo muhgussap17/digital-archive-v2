@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manajemen Users - Sistem Arsip Digital{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block page_title %}Manajemen Users{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Users</li>
+{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-sm btn-secondary" data-action="add-user">Tambah User</button>
+{% endblock %}
+
+{% block content %}
+<!-- User List -->
+<div class="row">
+    <div class="col-12" id="mainContent">
+        <div class="card shadow">
+            <!-- Card Header -->
+            <div class="card-header border-0 bg-transparent py-3">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="mb-0 d-inline-flex align-items-center">
+                            Daftar Users
+                            <span class="badge badge-pill badge-default ml-2">{{ total_results }}</span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card Body -->
+            {% include 'accounts/includes/user_table.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    // ==================== DATATABLES INITIALIZATION ====================
+    const table = $('#usersTable').DataTable({
+        // DataTables Options
+        language: {
+            url: '//cdn.datatables.net/plug-ins/2.3.5/i18n/id.json', // Bahasa Indonesia
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data tersedia",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            infoPostFix: "",
+            infoThousands: ",",
+            lengthMenu: "Tampilkan _MENU_ data per halaman",
+            loadingRecords: "Sedang memuat...",
+            processing: "Sedang memproses...",
+            search: "Cari: _INPUT_",
+            searchPlaceholder: "Username, nama, atau email...",
+            zeroRecords: "Tidak ada data yang ditemukan",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "<i class='fa-solid fa-angle-right'></i>",
+                previous: "<i class='fa-solid fa-angle-left'></i>"
+            }
+        },
+        
+        // Pagination
+        pageLength: 10,
+        lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "Semua"]],
+        
+        // Ordering
+        order: [[5, 'dsc']], // Sort by username column (index 0)
+        
+        // Column definitions
+        columnDefs: [
+            {
+                targets: 0, // Username column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 1, // Full name column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 2, // Email column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 3, // Phone column
+                orderable: true,
+                searchable: false,
+                className: 'text-left'
+            },
+            {
+                targets: 4, // Status column
+                orderable: true,
+                searchable: false,
+                className: 'text-left'
+            },
+            {
+                targets: 5, // Documents column
+                orderable: true,
+                searchable: false,
+                className: 'text-center'
+            },
+            {
+                targets: 6, // Actions column
+                orderable: false,
+                searchable: false,
+                className: 'text-right'
+            }
+        ],
+        
+        // Responsive & UI
+        responsive: false,
+        autoWidth: false,
+        
+        // DOM structure
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        
+        // Processing indicator
+        processing: false,
+        
+        // Callbacks
+        drawCallback: function(settings) {
+            // Re-initialize tooltips after table redraw
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Update total count badge
+            const info = this.api().page.info();
+            $('.card-header .badge-pill').text(info.recordsDisplay);
+        }
+    });
+    
+    // ==================== CUSTOM SEARCH STYLING ====================
+    // Style search box untuk match dengan theme
+    $('.dataTables_filter input').removeClass('form-control-sm');
+    $('.dataTables_filter input').addClass('form-control');
+    $('.dataTables_filter input').css({
+        'width': '350px',
+        'margin-left': '0.5em'
+    });
+    
+    // Style length selector
+    $('.dataTables_length select').addClass('form-control form-control-sm');
+    $('.dataTables_length select').css({
+        'width': 'auto',
+        'display': 'inline-block'
+    });
+    
+    // ==================== MODAL HANDLERS ====================
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Add User Button
+    $('[data-action="add-user"]').on('click', function(e) {
+        e.preventDefault();
+        loadUserModal('{% url "accounts:user_create" %}', 'Tambah User Baru');
+    });
+    
+    // Edit User Button (Event delegation untuk DataTables)
+    $('#usersTable').on('click', '[data-action="edit-user"]', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        const username = $(this).data('username');
+        loadUserModal(url, 'Edit User: ' + username);
+    });
+    
+    // Delete User Button (Event delegation untuk DataTables)
+    $('#usersTable').on('click', '[data-action="delete-user"]', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        const username = $(this).data('username');
+        
+        if (confirm(`Apakah Anda yakin ingin menonaktifkan user "${username}"?\n\nUser tidak akan bisa login, tapi data tetap tersimpan.`)) {
+            deleteUser(url);
+        }
+    });
+    
+    // Toggle Active Button (Event delegation untuk DataTables)
+    $('#usersTable').on('click', '[data-action="toggle-active"]', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        const username = $(this).data('username');
+        const isActive = $(this).data('active') === 'true';
+        const action = isActive ? 'menonaktifkan' : 'mengaktifkan';
+        
+        if (confirm(`Apakah Anda yakin ingin ${action} user "${username}"?`)) {
+            toggleActive(url);
+        }
+    });
+    
+    // Reset Password Button (Event delegation untuk DataTables)
+    $('#usersTable').on('click', '[data-action="reset-password"]', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        const username = $(this).data('username');
+        loadResetPasswordModal(url, username);
+    });
+    
+    // ==================== HELPER FUNCTIONS ====================
+    
+    // Load User Modal
+    function loadUserModal(url, title) {
+        $('#userModalTitle').text(title);
+        $('#userModalLoading').show();
+        $('#userModalBody').children().not('#userModalLoading').remove();
+        $('#userModal').modal('show');
+        $('#userForm').attr('action', url);
+        
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                $('#userModalLoading').hide();
+                if (response.html) {
+                    $('#userModalBody').append(response.html);
+                    
+                    // Initialize Select2 untuk groups
+                    $('.select2').select2({
+                        dropdownParent: $('#userModal')
+                    });
+                }
+            },
+            error: function(xhr) {
+                $('#userModalLoading').hide();
+                $('#userModalBody').append(
+                    '<div class="alert alert-danger">Gagal memuat form. Silakan coba lagi.</div>'
+                );
+            }
+        });
+    }
+    
+    // Submit User Form
+    $('#userForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const url = form.attr('action');
+        const formData = new FormData(form[0]);
+        
+        // Disable submit button
+        $('#userSubmitBtn').prop('disabled', true);
+        $('#userSubmitBtnText').text('Menyimpan...');
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#userModal').modal('hide');
+                    showNotification(response.message, 'success');
+                    
+                    // Reload page to refresh DataTables
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    // Show form errors
+                    if (response.html) {
+                        $('#userModalBody').children().not('#userModalLoading').remove();
+                        $('#userModalBody').append(response.html);
+                        
+                        // Re-initialize Select2
+                        $('.select2').select2({
+                            dropdownParent: $('#userModal')
+                        });
+                    }
+                    if (response.message) {
+                        showNotification(response.message, 'error');
+                    }
+                }
+            },
+            error: function(xhr) {
+                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            },
+            complete: function() {
+                $('#userSubmitBtn').prop('disabled', false);
+                $('#userSubmitBtnText').text('Simpan');
+            }
+        });
+    });
+    
+    // Delete User
+    function deleteUser(url) {
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showNotification(response.message, 'success');
+                    
+                    // Reload to refresh DataTables
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    showNotification(response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                showNotification('Gagal menonaktifkan user. Silakan coba lagi.', 'error');
+            }
+        });
+    }
+    
+    // Toggle Active
+    function toggleActive(url) {
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showNotification(response.message, 'success');
+                    location.reload();
+                } else {
+                    showNotification(response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                showNotification('Gagal mengubah status. Silakan coba lagi.', 'error');
+            }
+        });
+    }
+    
+    // Load Reset Password Modal
+    function loadResetPasswordModal(url, username) {
+        $('#resetPasswordModalTitle').text('Reset Password: ' + username);
+        $('#resetPasswordModalLoading').show();
+        $('#resetPasswordModalBody').children().not('#resetPasswordModalLoading').remove();
+        $('#resetPasswordModal').modal('show');
+        $('#resetPasswordForm').attr('action', url);
+        
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                $('#resetPasswordModalLoading').hide();
+                if (response.html) {
+                    $('#resetPasswordModalBody').append(response.html);
+                }
+            },
+            error: function(xhr) {
+                $('#resetPasswordModalLoading').hide();
+                $('#resetPasswordModalBody').append(
+                    '<div class="alert alert-danger">Gagal memuat form. Silakan coba lagi.</div>'
+                );
+            }
+        });
+    }
+    
+    // Submit Reset Password Form
+    $('#resetPasswordForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const url = form.attr('action');
+        const formData = new FormData(form[0]);
+        
+        // Disable submit button
+        $('#resetPasswordSubmitBtn').prop('disabled', true);
+        $('#resetPasswordSubmitBtnText').text('Mereset...');
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#resetPasswordModal').modal('hide');
+                    showNotification(response.message, 'success');
+                    location.reload();
+                } else {
+                    showNotification(response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            },
+            complete: function() {
+                $('#resetPasswordSubmitBtn').prop('disabled', false);
+                $('#resetPasswordSubmitBtnText').text('Reset Password');
+            }
+        });
+    });
+    
+    // Show Notification
+    function showNotification(message, type) {
+        // TODO: Integrate dengan notification system yang ada
+        // Sementara gunakan alert
+        alert(message);
+    }
+});
+</script>
+{% endblock %}

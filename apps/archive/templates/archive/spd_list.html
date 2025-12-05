@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-<!-- Document List - Datatables (belum berfungsi) -->
+<!-- SPD List -->
 <div class="row">
     <div class="col-12" id="mainContent">
         <div class="card shadow">
@@ -47,7 +47,6 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block filter_modal %}
@@ -60,20 +59,6 @@
 $(document).ready(function() {
     // Initialize tooltips
     $('[data-toggle="tooltip"]').tooltip();
-    
-    // View toggle (future feature)
-    $('#viewTable').on('click', function() {
-        $(this).addClass('active');
-        $('#viewGrid').removeClass('active');
-        // Implement table view
-    });
-    
-    $('#viewGrid').on('click', function() {
-        $(this).addClass('active');
-        $('#viewTable').removeClass('active');
-        // Implement grid view (future)
-        alert('Grid view coming soon!');
-    });
 
     // Initialize Select2 dan Datepicker saat modal DIBUKA
     $('#filterModal').on('shown.bs.modal', function() {

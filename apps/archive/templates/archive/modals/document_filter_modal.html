@@ -1,7 +1,7 @@
 {% load static %}
 <!-- Document Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="filterModalLabel">Filter Dokumen</h5>
@@ -30,7 +30,7 @@
                     <!-- Date Range Filter -->
                     <div class="row input-daterange datepicker align-items-center form-row">
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group mb-0">
                                 <label class="form-control-label" for="{{ filter_form.date_from.id_for_label }}">
                                     {{ filter_form.date_from.label }}
                                 </label>
@@ -38,7 +38,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group mb-0">
                                 <label class="form-control-label" for="{{ filter_form.date_to.id_for_label }}">
                                     {{ filter_form.date_to.label }}
                                 </label>

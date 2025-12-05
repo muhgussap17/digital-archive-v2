@@ -1,0 +1,111 @@
+{% load static %}
+{% load custom_tags %}
+<!-- Form Content untuk Tambah/Edit Pegawai -->
+
+{% if is_update %}
+    <!-- Info edit mode -->
+    <div class="alert alert-default mb-3">
+        <i class="fa-solid fa-circle-info mr-2"></i>
+        <strong>Edit Mode:</strong> Perbarui data pegawai yang sudah ada.
+    </div>
+{% endif %}
+
+<div class="form-row">
+    <!-- NIP Pegawai -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.nip.id_for_label }}">
+                {{ form.nip.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.nip }}
+            {% if form.nip.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.nip.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- <small class="form-text text-muted">
+                NIP harus 18 digit angka (contoh: 198501012010011001)
+            </small> -->
+        </div>
+    </div>
+    
+    <!-- Nama Lengkap -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.name.id_for_label }}">
+                {{ form.name.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.name.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="form-row">
+    <!-- Jabatan -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.position.id_for_label }}">
+                {{ form.position.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.position }}
+            {% if form.position.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.position.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Unit Kerja -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.department.id_for_label }}">
+                {{ form.department.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.department }}
+            {% if form.department.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.department.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row align-items-center">
+    <!-- Status Aktif -->
+    <div class="col-auto d-flex align-items-center">
+        <div class="form-group mb-0">
+            <div class="custom-control custom-checkbox">
+                {{ form.is_active }}
+                <label class="custom-control-label" for="{{ form.is_active.id_for_label }}">
+                    {{ form.is_active.label }}
+                </label>
+            </div>
+            {% if form.is_active.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.is_active.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-auto d-flex align-items-center p-0">
+        <small class="form-text text-muted m-0">(Nonaktifkan jika pegawai sudah tidak bertugas)</small>
+    </div>
+</div>
+
+<!-- Non-field errors (if any) -->
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}

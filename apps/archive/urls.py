@@ -8,7 +8,7 @@ urlpatterns = [
     path('', dashboard, name='dashboard'),
     path('test/', test, name='test'),
     
-    # Search Documents
+    # Search Documents (under development feature)
     path('search/', search_documents, name='document_search'), 
 
     # Document CRUD (Modal/AJAX endpoints)
@@ -31,4 +31,10 @@ urlpatterns = [
     # Document Actions (View, Preview, Download)
     path('documents/<int:pk>/preview/', document_preview, name='document_preview'), # Preview action
     path('documents/<int:pk>/download/', document_download, name='document_download'), # Download action
+
+    # List pegawai
+    path('employees/', employee_list, name='employee_list'),
+    path('employees/create/', employee_create, name='employee_create'),
+    path('employees/<int:pk>/update/', employee_update, name='employee_update'),
+    path('employees/<int:pk>/delete/', employee_delete, name='employee_delete'),
 ]

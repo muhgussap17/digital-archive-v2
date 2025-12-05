@@ -31,7 +31,7 @@
                     <!-- Username (Read-only) -->
                     <div class="form-group">
                         <label class="form-control-label" for="username">Username</label>
-                        <input type="text" class="form-control" id="username" value="{{ request.user.username }}"readonly>
+                        <input type="text" class="form-control" id="username" value="{{ request.user.username }}" disabled>
                     </div>
                     
                     <!-- Email -->
@@ -53,7 +53,7 @@
                             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-block">Batal</a>
                         </div>
                         <div class="col-6">
-                            <button type="submit" class="btn btn-default btn-block">Simpan Perubahan</button>
+                            <button type="submit" class="btn btn-default btn-block">Simpan</button>
                         </div>
                     </div>
                 </div>

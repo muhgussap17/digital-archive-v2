@@ -11,9 +11,11 @@ Exports:
 from .ajax_handler import AjaxHandler
 from .document_service import DocumentService
 from .spd_service import SPDService
+from .employee_service import EmployeeService
 
 __all__ = [
     'AjaxHandler',
     'DocumentService',
     'SPDService',
+    'EmployeeService',
 ]

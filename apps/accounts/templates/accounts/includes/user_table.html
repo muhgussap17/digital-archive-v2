@@ -1,0 +1,137 @@
+{% load static %}
+{% load date_filters %}
+{% load custom_tags %}
+
+<div class="table-responsive py-3">
+    <table class="table align-items-center table-flush" id="usersTable">
+        <!-- Table Head -->
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Nama Lengkap</th>
+                <th scope="col">Email</th>
+                <th scope="col">No. Telepon</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-center">Documents</th>
+                <th scope="col" class="text-right"></th>
+            </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody class="list">
+            {% for user in users %}
+            <tr>
+                <td class="username font-weight-bold">
+                    {{ user.username }}
+                </td>
+                <td class="full-name">
+                    {{ user.full_name|default:"-" }}
+                </td>
+                <td class="email">
+                    {{ user.email|default:"-" }}
+                </td>
+                <td class="phone">
+                    {{ user.phone|default:"-" }}
+                </td>
+                <td class="status">
+                    <!-- Active Status -->
+                    {% if user.is_active %}
+                        <span class="badge badge-pill badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-pill badge-danger">Inactive</span>
+                    {% endif %}
+                    
+                    <!-- Role Badges -->
+                    {% if user.is_superuser %}
+                        <span class="badge badge-pill badge-danger">Superuser</span>
+                    {% elif user.is_staff %}
+                        <span class="badge badge-pill badge-warning">Staff</span>
+                    {% endif %}
+                    
+                    <!-- Groups -->
+                    {% if user.groups.all %}
+                        {% for group in user.groups.all %}
+                            <span class="badge badge-pill badge-info">{{ group.name }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <span class="badge badge-pill badge-default">
+                        {{ user.document_count }}
+                    </span>
+                </td>
+                <td class="text-right">
+                    <a href="#" class="btn btn-outline-secondary text-default btn-sm mr-0" data-toggle="dropdown" title="More">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <!-- Edit -->
+                        <a href="#" 
+                           class="dropdown-item text-default" 
+                           data-action="edit-user"
+                           data-url="{% url 'accounts:user_update' user.pk %}"
+                           data-username="{{ user.username }}">
+                            <i class="fa-solid fa-pen mr-2"></i>Edit
+                        </a>
+                        
+                        <!-- Reset Password -->
+                        <a href="#" 
+                           class="dropdown-item text-default" 
+                           data-action="reset-password"
+                           data-url="{% url 'accounts:user_reset_password' user.pk %}"
+                           data-username="{{ user.username }}">
+                            <i class="fa-solid fa-key mr-2"></i>Reset Password
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <!-- Toggle Active -->
+                        {% if user.is_active %}
+                            <a href="#" 
+                               class="dropdown-item text-warning" 
+                               data-action="toggle-active"
+                               data-url="{% url 'accounts:user_toggle_active' user.pk %}"
+                               data-username="{{ user.username }}"
+                               data-active="true">
+                                <i class="fa-solid fa-ban mr-2"></i>Nonaktifkan
+                            </a>
+                        {% else %}
+                            <a href="#" 
+                               class="dropdown-item text-success" 
+                               data-action="toggle-active"
+                               data-url="{% url 'accounts:user_toggle_active' user.pk %}"
+                               data-username="{{ user.username }}"
+                               data-active="false">
+                                <i class="fa-solid fa-check mr-2"></i>Aktifkan
+                            </a>
+                        {% endif %}
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <!-- Delete -->
+                        <a href="#" 
+                           class="dropdown-item text-danger" 
+                           data-action="delete-user"
+                           data-url="{% url 'accounts:user_delete' user.pk %}"
+                           data-username="{{ user.username }}">
+                            <i class="fa-solid fa-trash mr-2"></i>Hapus
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center py-5">
+                    <div class="text-center py-4">
+                        <i class="fa-solid fa-users fa-4x text-muted mb-3"></i>
+                        <p class="text-sm text-muted mb-4">
+                            Belum ada data user
+                        </p>
+                        <button class="btn btn-sm btn-default" data-action="add-user">Tambah User Pertama</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

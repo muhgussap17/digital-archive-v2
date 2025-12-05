@@ -1,0 +1,215 @@
+{% load static %}
+<!-- Form Content untuk Tambah/Edit User -->
+
+{% if is_update %}
+    <!-- Info edit mode -->
+    <div class="alert alert-default mb-3">
+        <i class="fa-solid fa-circle-info mr-2"></i>
+        <strong>Edit Mode:</strong> Username tidak dapat diubah. Gunakan "Reset Password" untuk mengubah password.
+    </div>
+{% endif %}
+
+<h4>Login & Personal Info</h4>
+
+<div class="form-row">
+    <!-- Username -->
+    <div class="col-md-6">
+        <div class="form-group">
+            {% if is_update %}
+            <label class="form-control-label" for="id_username">Username</label>
+                <input name="username" id="id_username" type="text" class="form-control" value="{{ user.username }}" disabled>
+            {% else %}
+            <label class="form-control-label" for="{{ form.username.id_for_label }}">
+                {{ form.username.label }}
+                <span class="text-danger">*</span>
+            </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.username.errors.0 }}
+                    </div>
+                {% endif %}
+                <!-- {% if form.username.help_text %}
+                    <small class="form-text text-muted">
+                        {{ form.username.help_text }}
+                    </small>
+                {% endif %} -->
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Full Name -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.full_name.id_for_label }}">
+                {{ form.full_name.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.full_name.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if not is_update %}
+<!-- Password Fields (Create Only) -->
+<div class="form-row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.password.id_for_label }}">
+                {{ form.password.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.password.errors.0 }}
+                </div>
+            {% endif %}
+            <!-- {% if form.password.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.password.help_text }}
+                </small>
+            {% endif %} -->
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.password_confirm.id_for_label }}">
+                {{ form.password_confirm.label }}
+                <span class="text-danger">*</span>
+            </label>
+            {{ form.password_confirm }}
+            {% if form.password_confirm.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.password_confirm.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="form-row">
+    <!-- Email -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.email.id_for_label }}">
+                {{ form.email.label }}
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Phone -->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.phone.id_for_label }}">
+                {{ form.phone.label }}
+            </label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.phone.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<hr class="my-3">
+<h4>Permissions & Groups</h4>
+
+<div class="row">
+    <!-- Groups -->
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="form-control-label" for="{{ form.groups.id_for_label }}">
+                {{ form.groups.label }}
+            </label>
+            {{ form.groups }}
+            {% if form.groups.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.groups.errors.0 }}
+                </div>
+            {% endif %}
+            {% if form.groups.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.groups.help_text }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- is_staff -->
+    <div class="col-md-4">
+        <div class="form-group mb-0">
+            <div class="custom-control custom-checkbox">
+                {{ form.is_staff }}
+                <label class="custom-control-label" for="{{ form.is_staff.id_for_label }}">
+                    {{ form.is_staff.label }}
+                </label>
+            </div>
+            {% if form.is_staff.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.is_staff.help_text }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- is_superuser -->
+    <div class="col-md-4">
+        <div class="form-group mb-0">
+            <div class="custom-control custom-checkbox">
+                {{ form.is_superuser }}
+                <label class="custom-control-label" for="{{ form.is_superuser.id_for_label }}">
+                    {{ form.is_superuser.label }}
+                </label>
+            </div>
+            {% if form.is_superuser.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.is_superuser.help_text }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if is_update %}
+    <!-- is_active (Update Only) -->
+    <div class="col-md-4">
+        <div class="form-group mb-0">
+            <div class="custom-control custom-checkbox">
+                {{ form.is_active }}
+                <label class="custom-control-label" for="{{ form.is_active.id_for_label }}">
+                    {{ form.is_active.label }}
+                </label>
+            </div>
+            {% if form.is_active.help_text %}
+                <small class="form-text text-muted">
+                    {{ form.is_active.help_text }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Non-field errors (if any) -->
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}

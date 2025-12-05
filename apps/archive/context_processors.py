@@ -3,6 +3,7 @@ Context processors untuk data global yang dibutuhkan di semua template
 """
 
 from .models import DocumentCategory, Document, Employee
+from apps.accounts.models import User
 
 
 def global_context(request):
@@ -97,7 +98,15 @@ def sidebar_context(request):
     # Hitung total dokumen aktif di sistem
     total_documents = Document.objects.filter(is_deleted=False).count()
     
+    # Total employees
+    total_employees = Employee.objects.filter(is_active=True).count()
+
+    # Total users
+    total_users = User.objects.filter(is_active=True).count()
+
     return {
-        'categories': categories,
-        'total_documents': total_documents,
+        'sidebar_categories': categories,
+        'sidebar_total_documents': total_documents,
+        'sidebar_total_employees': total_employees,
+        'sidebar_total_users': total_users,
     }

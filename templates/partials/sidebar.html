@@ -39,9 +39,9 @@
                         <a class="nav-link {% if 'document' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'archive:document_list' %}">
                             <i class="fa-solid fa-folder-open text-info"></i>
                             <span class="nav-link-text">Semua Dokumen</span>
-                            {% if total_documents %}
+                            {% if sidebar_total_documents %}
                             <span class="badge badge-sm badge-pill badge-info ml-auto">
-                                {{ total_documents }}
+                                {{ sidebar_total_documents }}
                             </span>
                             {% endif %}
                         </a>
@@ -59,7 +59,7 @@
 
                 <!-- Categories -->
                 <ul class="navbar-nav">
-                    {% for category in categories %}
+                    {% for category in sidebar_categories %}
                     <li class="nav-item">
                         {% if category.slug == 'spd' %}
                             <a class="nav-link {% if request.resolver_match.url_name == 'spd_list' %}active{% endif %}"
@@ -107,32 +107,85 @@
                     </li>
                     {% endfor %}
                 </ul>
+
+                <!-- Divider -->
+                <hr class="my-3">
                 
+                <!-- Lainnya Heading -->
+                <h6 class="navbar-heading p-0 text-muted">
+                    <span class="docs-normal">Lainnya</span>
+                    <span class="docs-mini"> L </span>
+                </h6>
+
+                <!-- Opsi Lain -->
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#navbar-others" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-others">
+                            <i class="fa-solid fa-gear text-default"></i>
+                            <span class="nav-link-text">Lainnya</span>
+                        </a>
+                        <div class="collapse" id="navbar-others">
+                            <ul class="nav nav-sm flex-column">
+                                <li class="nav-item">
+                                    <!-- Pegawai -->
+                                    <a href="{% url 'archive:employee_list' %}" class="nav-link {% if request.resolver_match.url_name == 'employee' %}active{% endif %}">
+                                        <span class="sidenav-mini-icon"> E </span>
+                                        <span class="sidenav-normal">Manajemen Pegawai</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <!-- Pengguna -->
+                                    <a href="{% url 'accounts:user_list' %}" class="nav-link">
+                                        <span class="sidenav-mini-icon"> U </span>
+                                        <span class="sidenav-normal">Manajemen Pengguna</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <!-- Test -->
+                                    <a href="{% url 'archive:test' %}" class="nav-link {% if request.resolver_match.url_name == 'test' %}active{% endif %}">
+                                        <span class="sidenav-mini-icon"> T </span>
+                                        <span class="sidenav-normal">Halaman Testing</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+
                 <!-- Divider -->
                 <hr class="my-3">
                 
                 <!-- Upload Heading -->
                 <h6 class="navbar-heading p-0 text-muted">
                     <span class="docs-normal">Upload</span>
-                    <span class="docs-mini">U</span>
+                    <span class="docs-mini"> U </span>
                 </h6>
-
+                
                 <!-- Upload Actions -->
                 <ul class="navbar-nav">
-                    <!-- Upload Belanjaan -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-action="upload-document">
-                            <i class="fa-solid fa-circle-plus text-success"></i>
-                            <span class="nav-link-text">Upload Belanjaan</span>
+                        <a class="nav-link" href="#navbar-uploads" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-uploads">
+                            <i class="fa-solid fa-circle-plus text-default"></i>
+                            <span class="nav-link-text">Upload</span>
                         </a>
-                    </li>
-
-                    <!-- Upload SPD -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-action="upload-spd">
-                            <i class="fa-solid fa-circle-plus text-warning"></i>
-                            <span class="nav-link-text">Upload SPD</span>
-                        </a>
+                        <div class="collapse" id="navbar-uploads">
+                            <ul class="nav nav-sm flex-column">
+                                <li class="nav-item">
+                                    <!-- Belanjaan -->
+                                    <a href="#" class="nav-link" data-action="upload-document">
+                                        <span class="sidenav-mini-icon"> B </span>
+                                        <span class="sidenav-normal">Upload Belanjaan</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <!-- SPD -->
+                                    <a href="#" class="nav-link" data-action="upload-spd">
+                                        <span class="sidenav-mini-icon"> S </span>
+                                        <span class="sidenav-normal">Upload SPD</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
             </div>

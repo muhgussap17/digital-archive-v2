@@ -1,0 +1,93 @@
+{% load static %}
+{% load date_filters %}
+{% load custom_tags %}
+
+<div class="table-responsive py-3">
+    <table class="table align-items-center table-flush" id="employeesTable">
+        <!-- Table Head -->
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">NIP</th>
+                <th scope="col">Nama Lengkap</th>
+                <th scope="col">Jabatan</th>
+                <th scope="col">Unit Kerja</th>
+                <th scope="col" class="text-center">Jumlah SPD</th>
+                <th scope="col" class="text-right"></th>
+            </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody class="list">
+            {% for employee in employees %}
+            <tr>
+                <td class="nip">
+                    <span class="badge badge-default">{{ employee.nip }}</span>
+                </td>
+                <td class="name font-weight-bold">
+                    {{ employee.name }}
+                </td>
+                <td class="position">
+                    {{ employee.position }}
+                </td>
+                <td class="department">
+                    {{ employee.department }}
+                </td>
+                <td class="text-center">
+                    <span class="badge badge-pill badge-default">
+                        {{ employee.spd_count }}
+                    </span>
+                </td>
+                <td class="text-right">
+                    <a href="#" class="btn btn-outline-secondary text-default btn-sm mr-0" data-toggle="dropdown" title="More">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <!-- Edit (Staff Only) -->
+                        {% if perms.archive.change_employee %}
+                        <a href="#" 
+                           class="dropdown-item text-default" 
+                           data-action="edit-employee"
+                           data-url="{% url 'archive:employee_update' employee.pk %}"
+                           data-name="{{ employee.name }}">
+                            <i class="fa-solid fa-pen mr-2"></i>Edit
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Delete (Staff Only) -->
+                        {% if perms.archive.delete_employee %}
+                        <div class="dropdown-divider"></div>
+                        <a href="#" 
+                           class="dropdown-item text-danger" 
+                           data-action="delete-employee"
+                           data-url="{% url 'archive:employee_delete' employee.pk %}"
+                           data-name="{{ employee.name }}">
+                            <i class="fa-solid fa-trash mr-2"></i>Hapus
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <div class="text-center py-4">
+                        <i class="fa-solid fa-users fa-4x text-muted mb-3"></i>
+                        <p class="text-sm text-muted mb-4">
+                            {% if search %}
+                                Tidak ada pegawai yang ditemukan dengan kata kunci "{{ search }}"
+                            {% else %}
+                                Belum ada data pegawai yang ditambahkan
+                            {% endif %}
+                        </p>
+                        {% if perms.archive.add_employee %}
+                        <button class="btn btn-sm btn-default" data-action="add-employee">
+                            <i class="fa-solid fa-plus mr-1"></i>Tambah Pegawai Pertama
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

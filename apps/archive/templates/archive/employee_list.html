@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Daftar Pegawai - Sistem Arsip Digital{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block page_title %}Manajemen Pegawai{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Pegawai</li>
+{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-sm btn-secondary" data-action="add-employee">Tambah Pegawai</button>
+{% endblock %}
+
+{% block content %}
+<!-- Employee List -->
+<div class="row">
+    <div class="col-12" id="mainContent">
+        <div class="card shadow">
+            <!-- Card Header -->
+            <div class="card-header">
+                <h4 class="mb-0 d-inline-flex align-items-center">
+                    Daftar Pegawai
+                    <span class="badge badge-default badge-pill ml-2">{{ total_results }}</span>
+                </h4>
+            </div>
+            
+            <!-- Card Body -->
+            {% include 'archive/includes/employee_table.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    // ==================== DATATABLES INITIALIZATION ====================
+    const table = $('#employeesTable').DataTable({
+        // DataTables Options
+        language: {
+            url: '//cdn.datatables.net/plug-ins/2.3.5/i18n/id.json', // Bahasa Indonesia
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data tersedia",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            infoPostFix: "",
+            infoThousands: ",",
+            lengthMenu: "Tampilkan _MENU_ data",
+            loadingRecords: "Sedang memuat...",
+            processing: "Sedang memproses...",
+            search: "Cari: _INPUT_",
+            searchPlaceholder: "Nama atau NIP...",
+            zeroRecords: "Tidak ada data yang ditemukan",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "<i class='fa-solid fa-angle-right'></i>",
+                previous: "<i class='fa-solid fa-angle-left'></i>"
+            }
+        },
+        
+        // Pagination
+        pageLength: 10,
+        lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "Semua"]],
+        
+        // Ordering
+        order: [[4, 'dsc']], // Sort by name column (index 1)
+        
+        // Column definitions
+        columnDefs: [
+            {
+                targets: 0, // NIP column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 1, // Name column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 2, // Position column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 3, // Department column
+                orderable: true,
+                searchable: true
+            },
+            {
+                targets: 4, // SPD Count column
+                orderable: true,
+                searchable: false,
+                className: 'text-center'
+            },
+            {
+                targets: 5, // Actions column
+                orderable: false,
+                searchable: false,
+                className: 'text-right'
+            }
+        ],
+        
+        // Responsive & UI
+        responsive: false,
+        autoWidth: false,
+        
+        // DOM structure
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        
+        // Processing indicator
+        processing: false,
+        
+        // Callbacks
+        drawCallback: function(settings) {
+            // Re-initialize tooltips after table redraw
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Update total count badge
+            const info = this.api().page.info();
+            $('.card-header .badge-pill').text(info.recordsDisplay);
+        }
+    });
+    
+    // ==================== CUSTOM SEARCH STYLING ====================
+    // Style search box untuk match dengan theme
+    $('.dataTables_filter input').removeClass('form-control-sm');
+    $('.dataTables_filter input').addClass('form-control');
+    $('.dataTables_filter input').css({
+        'width': '300px',
+        'margin-left': '0.5em'
+    });
+    
+    // Style length selector
+    $('.dataTables_length select').addClass('form-control form-control-sm');
+    $('.dataTables_length select').css({
+        'width': 'auto',
+        'display': 'inline-block',
+        'background-color': '#ffff'
+    });
+    
+    // ==================== MODAL HANDLERS ====================
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Add Employee Button
+    $('[data-action="add-employee"]').on('click', function(e) {
+        e.preventDefault();
+        loadEmployeeModal('{% url "archive:employee_create" %}', 'Tambah Pegawai Baru');
+    });
+    
+    // Edit Employee Button (Event delegation untuk DataTables)
+    $('#employeesTable').on('click', '[data-action="edit-employee"]', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        const name = $(this).data('name');
+        loadEmployeeModal(url, 'Edit Data Pegawai: ' + name);
+    });
+    
+    // Delete Employee Button (Event delegation untuk DataTables)
+    $('#employeesTable').on('click', '[data-action="delete-employee"]', function(e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        const name = $(this).data('name');
+        
+        if (confirm(`Apakah Anda yakin ingin menghapus pegawai "${name}"?\n\nData SPD terkait tetap tersimpan.`)) {
+            deleteEmployee(url);
+        }
+    });
+    
+    // ==================== HELPER FUNCTIONS ====================
+    // Load Employee Modal
+    function loadEmployeeModal(url, title) {
+        $('#employeeModalTitle').text(title);
+        $('#employeeModalLoading').show();
+        $('#employeeModalBody').children().not('#employeeModalLoading').remove();
+        $('#employeeModal').modal('show');
+        $('#employeeForm').attr('action', url);
+        
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                $('#employeeModalLoading').hide();
+                if (response.html) {
+                    $('#employeeModalBody').append(response.html);
+                }
+            },
+            error: function(xhr) {
+                $('#employeeModalLoading').hide();
+                $('#employeeModalBody').append(
+                    '<div class="alert alert-danger">Gagal memuat form. Silakan coba lagi.</div>'
+                );
+            }
+        });
+    }
+    
+    // Submit Employee Form
+    $('#employeeForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const url = form.attr('action');
+        const formData = new FormData(form[0]);
+        
+        // Disable submit button
+        $('#employeeSubmitBtn').prop('disabled', true);
+        $('#employeeSubmitBtnText').text('Menyimpan...');
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#employeeModal').modal('hide');
+                    showNotification(response.message, 'success');
+                    
+                    // Reload page to refresh DataTables
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    // Show form errors
+                    if (response.html) {
+                        $('#employeeModalBody').children().not('#employeeModalLoading').remove();
+                        $('#employeeModalBody').append(response.html);
+                    }
+                    if (response.message) {
+                        showNotification(response.message, 'error');
+                    }
+                }
+            },
+            error: function(xhr) {
+                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            },
+            complete: function() {
+                $('#employeeSubmitBtn').prop('disabled', false);
+                $('#employeeSubmitBtnText').text('Simpan');
+            }
+        });
+    });
+    
+    // Delete Employee
+    function deleteEmployee(url) {
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showNotification(response.message, 'success');
+                    
+                    // Reload to refresh DataTables
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    showNotification(response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                showNotification('Gagal menghapus pegawai. Silakan coba lagi.', 'error');
+            }
+        });
+    }
+    
+    // Show Notification (sesuaikan dengan sistem notifikasi Anda)
+    function showNotification(message, type) {
+        // TODO: Integrate dengan notification system yang ada
+        // Sementara gunakan alert
+        alert(message);
+    }
+});
+</script>
+{% endblock %}

@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block content %}
-<!-- Document List - Datatables (belum berfungsi) -->
+<!-- Document List -->
 <div class="row">
     <div class="col-12" id="mainContent">
         <div class="card shadow">
@@ -30,7 +30,7 @@
                             {% else %}
                                 Semua Dokumen
                             {% endif %}
-                        <span class="badge badge-default badge-pill ml-2">{{ total_results }}</span>
+                            <span class="badge badge-default badge-pill ml-2">{{ total_results }}</span>
                         </h4>
                     </div>
                     <!-- <div class="col-auto">
@@ -51,7 +51,6 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block filter_modal %}
@@ -64,20 +63,6 @@
 $(document).ready(function() {
     // Initialize tooltips
     $('[data-toggle="tooltip"]').tooltip();
-    
-    // View toggle (future feature)
-    $('#viewTable').on('click', function() {
-        $(this).addClass('active');
-        $('#viewGrid').removeClass('active');
-        // Implement table view
-    });
-    
-    $('#viewGrid').on('click', function() {
-        $(this).addClass('active');
-        $('#viewTable').removeClass('active');
-        // Implement grid view (future)
-        alert('Grid view coming soon!');
-    });
 
     // Initialize Select2 dan Datepicker saat modal DIBUKA
     $('#filterModal').on('shown.bs.modal', function() {
@@ -101,8 +86,6 @@ $(document).ready(function() {
     $('#filterModal').on('hidden.bs.modal', function() {
         $('#{{ filter_form.employee.id_for_label }}').select2('destroy');
     });
-});
-</script>
 });
 </script>
 {% endblock %}

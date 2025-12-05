@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,14 +10,12 @@
     <!-- Favicon -->
     <link href="{% static 'argon/img/brand/favicon.png' %}" rel="icon" type="image/png">
     
-    <!-- Fonts -->
-    <link href="{% static 'fonts/plus-jakarta-sans.css' %}" rel="stylesheet">
-    
-    <!-- Icons -->
-    <link href="{% static 'vendor/fontawesome-7/css/all.min.css' %}" rel="stylesheet">
+    <!-- Icons - FontAwesome 7 -->
+    <link href="{% static 'vendor/fontawesome/css/fontawesome.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/solid.min.css' %}" rel="stylesheet">
     
     <!-- Argon CSS -->
-    <link href="{% static 'argon/css/argon.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/argon.min.css' %}" rel="stylesheet">
     
     <!-- Custom CSS -->
     <link href="{% static 'css/custom.css' %}" rel="stylesheet">
@@ -69,7 +68,7 @@
                             {% if messages %}
                                 {% for message in messages %}
                                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    <span class="alert-icon"><i class="fa-solid fa-{{ message.tags == 'error' and 'triangle-exclamation' or 'circle-check' }}"></i></span>
+                                    <span class="alert-icon"><i class="fa-solid fa-circle"></i></span>
                                     <span class="alert-text">{{ message }}</span>
                                     <button type="button" class="close" data-dismiss="alert">
                                         <span>&times;</span>

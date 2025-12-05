@@ -57,6 +57,14 @@ from .api_views import (
     dashboard_stats_api,
 )
 
+# Employee CRUD
+from .employee_views import (
+    employee_list,
+    employee_create,
+    employee_update,
+    employee_delete,
+)
+
 __all__ = [
     # Dashboard & List
     'dashboard',
@@ -88,4 +96,10 @@ __all__ = [
     'CategoryViewSet',
     'SPDViewSet',
     'dashboard_stats_api',
+
+    # Employee
+    'employee_list',
+    'employee_create',
+    'employee_update',
+    'employee_delete',
 ]

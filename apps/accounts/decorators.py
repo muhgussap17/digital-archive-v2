@@ -2,15 +2,6 @@ from functools import wraps
 from django.shortcuts import redirect
 from django.contrib import messages
 
-def is_staff_user(user):
-    """
-    Memeriksa apakah user adalah superuser ATAU anggota grup 'Staff'.
-    """
-    if user.is_authenticated:
-        return user.is_superuser or user.groups.filter(name='Staff').exists()
-    return False
-
-
 def staff_required(function=None, redirect_url='/accounts/login/'):
     """
     Decorator untuk views yang hanya memperbolehkan Superuser atau 'Staff'.

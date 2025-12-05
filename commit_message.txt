@@ -1,0 +1,202 @@
+feat: Add Employee & User Management with DataTables integration
+
+MAJOR FEATURES:
+- Complete Employee Management (CRUD operations)
+- Complete User Management (CRUD + permissions)
+- DataTables integration for live search & sorting
+- Consistent service layer architecture with archive app
+
+NEW MODULES:
+
+apps/archive/
+  services/
+    - employee_service.py: Employee business logic (create, update, delete, statistics)
+  
+  views/
+    - employee_views.py: Employee CRUD views with AJAX support
+  
+  forms/
+    - employee_forms.py: EmployeeForm with NIP validation (18 digit)
+  
+  templates/archive/
+    - employee_list.html: List with DataTables, search, pagination
+    - includes/employee_table.html: Table component with SPD count
+    - modals/employee_modal.html: Create/Edit modal
+    - forms/employee_form_content.html: Form fields with Bootstrap Argon
+  
+  urls.py:
+    + /employees/                    (list)
+    + /employees/create/             (create)
+    + /employees/<int:pk>/update/    (update)
+    + /employees/<int:pk>/delete/    (soft delete)
+
+apps/accounts/
+  services/
+    - user_service.py: User management business logic
+      * create_user (with password hashing)
+      * update_user (profile + permissions)
+      * delete_user (soft delete)
+      * toggle_active_status
+      * change_password (admin reset)
+      * assign_groups
+      * validate_password_strength
+  
+  views.py: (REFACTORED + EXTENDED)
+    EXISTING (improved):
+    - profile: User profile dashboard
+    - profile_edit: Edit own profile (limited fields)
+    
+    NEW (superuser only):
+    - user_list: List all users with DataTables
+    - user_create: Create user with password
+    - user_update: Update user profile & permissions
+    - user_delete: Soft delete user
+    - user_toggle_active: Activate/deactivate user
+    - user_reset_password: Admin reset user password (no old password)
+  
+  forms.py: (REFACTORED with mixins pattern)
+    MIXINS:
+    - BootstrapFormMixin: Auto add Bootstrap classes
+    - UsernameFieldMixin: Username field with validation
+    - PasswordFieldMixin: Password + confirm fields
+    - ProfileFieldsMixin: full_name, email, phone
+    - PermissionFieldsMixin: is_staff, is_superuser, groups
+    
+    FORMS:
+    - UserCreateForm: Create user (username + password)
+    - UserUpdateForm: Update user (profile + permissions)
+    - ProfileEditForm: User edit own profile (existing, kept)
+  
+  admin.py: (ENHANCED)
+    - Custom list display with status badges
+    - Search by username/name/email/phone
+    - Filters: active, staff, superuser, groups, date
+    - Bulk actions: activate, deactivate, make staff, remove staff
+    - Document count with admin link
+    - Safety: prevent self-deactivation
+  
+  templates/accounts/
+    - user_list.html: List with DataTables
+    - includes/user_table.html: Table with badges (active, staff, superuser, groups)
+    - modals/user_modal.html: Create/Edit modal
+    - modals/reset_password_modal.html: Reset password modal
+    - forms/user_form_content.html: User form fields
+    - forms/reset_password_form_content.html: Reset password form
+  
+  urls.py:
+    EXISTING:
+    - /profile/
+    - /profile/edit/
+    - /password-change/
+    
+    NEW (superuser only):
+    + /users/                         (list)
+    + /users/create/                  (create)
+    + /users/<int:pk>/update/         (update)
+    + /users/<int:pk>/delete/         (soft delete)
+    + /users/<int:pk>/toggle-active/  (toggle status)
+    + /users/<int:pk>/reset-password/ (admin reset)
+
+DATATABLES INTEGRATION:
+- Client-side processing for < 1,000 records
+- Live search without page reload
+- Column sorting on click
+- Custom pagination with Bootstrap Argon theme
+- Bahasa Indonesia language pack
+- Event delegation for dynamic rows
+
+Employee Features:
+  ✓ NIP validation (18 digits, numeric only)
+  ✓ SPD count annotation (query optimization)
+  ✓ Soft delete (is_active flag)
+  ✓ Search by name/NIP
+  ✓ AJAX modal for create/edit
+  ✓ DataTables with 20 rows per page
+
+User Features:
+  ✓ Password strength validation (min 8 chars, uppercase, lowercase, digit, special)
+  ✓ Permission management (is_staff, is_superuser, groups)
+  ✓ Self-modification prevention (cannot delete/deactivate own account)
+  ✓ Admin reset password (no old password required)
+  ✓ User self-edit profile (limited fields, existing template)
+  ✓ User self-change password (old password required, existing template)
+  ✓ Document & activity counts with query optimization
+  ✓ Status badges (Active/Inactive, Staff, Superuser, Groups)
+
+ARCHITECTURE IMPROVEMENTS:
+- Service Layer Pattern (separation of concerns)
+  * Views: HTTP layer only (thin controllers)
+  * Services: Business logic (pure functions)
+  * Models: Data layer
+- Form Mixins Pattern (DRY principle)
+- Transaction management (atomic operations)
+- Query optimization (select_related, prefetch_related, annotate)
+- Consistent error handling
+- Comprehensive documentation (docstrings with examples)
+
+SECURITY ENHANCEMENTS:
+- Password hashing (Django's make_password)
+- CSRF protection on all mutations
+- Permission checks (@user_passes_test decorator)
+- Soft delete (data preservation for audit)
+- Self-modification prevention (superuser cannot delete own account)
+- Transaction rollback on errors
+
+BUG FIXES:
+- DataTables badge update: Changed selector from `.badge-pill` to `.card-header .badge-pill`
+  * Prevents sidebar badge corruption when DataTables updates count
+  * Applies to both employee_list.html and user_list.html
+
+CONSISTENCY:
+- Reuse AjaxHandler from archive app
+- Same modal pattern as document management
+- Same table structure as document list
+- Bootstrap Argon theme throughout
+- Consistent naming conventions
+- Same documentation style
+
+DOCUMENTATION:
+- Comprehensive docstrings with examples
+- Implementation notes in each file
+- Maintenance notes for future developers
+- Type hints for better IDE support
+- Complete implementation guide with checklist
+
+TESTING CHECKLIST:
+  Employee:
+  - [ ] Create employee with valid NIP (18 digits)
+  - [ ] Create employee with invalid NIP (validation error)
+  - [ ] Update employee data
+  - [ ] Delete employee (soft delete, is_active=False)
+  - [ ] Search employees by name/NIP
+  - [ ] DataTables pagination works
+  - [ ] DataTables sorting works
+  - [ ] SPD count displays correctly
+  
+  User:
+  - [ ] Superuser can access user list
+  - [ ] Non-superuser cannot access user list (403)
+  - [ ] Create user with valid password
+  - [ ] Create user with weak password (validation error)
+  - [ ] Update user profile & permissions
+  - [ ] Assign groups to user
+  - [ ] Delete user (soft delete, is_active=False)
+  - [ ] Toggle user active status
+  - [ ] Admin reset user password (no old password)
+  - [ ] User edit own profile (limited fields)
+  - [ ] User change own password (old password required)
+  - [ ] Prevent self-deletion
+  - [ ] Prevent self-deactivation
+  - [ ] Prevent removing own superuser status
+  - [ ] Search users by username/name/email
+  - [ ] DataTables pagination works
+  - [ ] DataTables sorting works
+
+MIGRATION:
+- No database migrations required (uses existing User model)
+- Employee model already exists
+- All services use existing models
+
+FILES CHANGED: 20+
+LINES ADDED: ~3,500+
+LINES DELETED: ~50

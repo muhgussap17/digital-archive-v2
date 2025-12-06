@@ -55,39 +55,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-$(document).ready(function() {
-    // Initialize tooltips
-    $('[data-toggle="tooltip"]').tooltip();
-
-    // Initialize Select2 dan Datepicker saat modal DIBUKA
-    $('#filterModal').on('shown.bs.modal', function() {
-        // Initialize Select2 untuk employee dropdown
-        $('#{{ filter_form.employee.id_for_label }}').select2({
-            allowClear: true,
-            dropdownParent: $('#filterModal')  // PENTING: Attach ke modal
-        });
-        
-        // Initialize Select2 untuk destination dropdown
-        $('#{{ filter_form.destination.id_for_label }}').select2({
-            allowClear: true,
-            dropdownParent: $('#filterModal')  // PENTING: Attach ke modal
-        });
-        
-        // Initialize Datepicker
-        $('.datepicker').datepicker({
-            format: 'dd/mm/yyyy',
-            autoclose: true,
-            todayHighlight: true,
-            orientation: 'top auto',
-            language: 'id'
-        });
-    });
-    
-    // Destroy Select2 saat modal DITUTUP (cleanup)
-    $('#filterModal').on('hidden.bs.modal', function() {
-        $('#{{ filter_form.employee.id_for_label }}').select2('destroy');
-    });
-});
-</script>
+<script src="{% static 'js/modules/spd_list.js' %}"></script>
 {% endblock %}

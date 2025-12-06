@@ -279,7 +279,7 @@ class SPDService:
                 document=document,
                 user=user,
                 action_type='delete',
-                description=f'SPD {document.get_display_name()} dihapus',
+                description=f'SPD {document.get_filename()} dihapus',
                 request=request
             )
             

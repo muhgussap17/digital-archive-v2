@@ -75,7 +75,7 @@ def spd_create(request):
             return AjaxHandler.handle_ajax_or_redirect(
                 request=request,
                 success=True,
-                message=f'SPD "{document.get_display_name()}" berhasil diupload!',
+                message=f'SPD "{document.get_filename()}" berhasil diupload!',
                 redirect_url='archive:document_list'
             )
             
@@ -174,7 +174,7 @@ def spd_update(request, pk):
             return AjaxHandler.handle_ajax_or_redirect(
                 request=request,
                 success=True,
-                message=f'SPD "{updated_document.get_display_name()}" berhasil diperbarui!',
+                message=f'SPD "{updated_document.get_filename()}" berhasil diperbarui!',
                 redirect_url='archive:document_list'
             )
             
@@ -257,7 +257,7 @@ def spd_delete(request, pk):
         return AjaxHandler.handle_ajax_or_redirect(
             request=request,
             success=True,
-            message=f'SPD "{document.get_display_name()}" berhasil dihapus!',
+            message=f'SPD "{document.get_filename()}" berhasil dihapus!',
             redirect_url='archive:document_list'
         )
         

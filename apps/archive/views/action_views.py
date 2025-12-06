@@ -138,7 +138,7 @@ def document_download(request, pk):
             document=document,
             user=request.user,
             action_type='download',
-            description=f'Dokumen {document.get_display_name()} diunduh',
+            description=f'Dokumen {document.get_filename()} diunduh',
             request=request
         )
         

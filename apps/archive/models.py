@@ -210,7 +210,7 @@ class Document(models.Model):
         ]
     
     def __str__(self):
-        return self.get_display_name()    
+        return self.get_filename()    
 
     def get_display_name(self):
         """Generate display name from metadata"""
@@ -385,7 +385,7 @@ class DocumentActivity(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.get_action_type_display()} - {self.document.title}" # type: ignore
+        return f"{self.get_action_type_display()} - {self.document.get_filename()}" # type: ignore
 
 
 class SystemSetting(models.Model):

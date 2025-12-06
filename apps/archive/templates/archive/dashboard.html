@@ -121,7 +121,7 @@
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">{{ document.get_display_name }}</h6>
+                                        <h6 class="mb-0">{{ document.get_filename }}</h6>
                                         <small class="text-muted">{{ document.file.name }}</small>
                                     </div>
                                 </div>
@@ -199,7 +199,7 @@
                                     {{ activity.get_action_type_display }}
                                 </h4>
                                 <p class="text-xs text-muted mb-0">
-                                    {{ activity.document.get_display_name|truncate_chars:40 }}
+                                    {{ activity.document.get_filename|truncate_chars:40 }}
                                 </p>
                                 <small class="text-muted">
                                     <i class="fa-solid fa-user"></i> {{ activity.user.full_name }} • 

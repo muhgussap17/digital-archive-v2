@@ -135,7 +135,7 @@ class DocumentService:
                 document=document,
                 user=user,
                 action_type='create',
-                description=f'Dokumen {document.get_display_name()} dibuat',
+                description=f'Dokumen {document.get_filename()} dibuat',
                 request=request
             )
             
@@ -206,7 +206,7 @@ class DocumentService:
                 document=document,
                 user=user,
                 action_type='update',
-                description=f'Dokumen {document.get_display_name()} diperbarui',
+                description=f'Dokumen {document.get_filename()} diperbarui',
                 request=request
             )
             
@@ -263,7 +263,7 @@ class DocumentService:
                 document=document,
                 user=user,
                 action_type='delete',
-                description=f'Dokumen {document.get_display_name()} dihapus',
+                description=f'Dokumen {document.get_filename()} dihapus',
                 request=request
             )
             

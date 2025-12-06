@@ -71,7 +71,7 @@ def document_create(request):
             return AjaxHandler.handle_ajax_or_redirect(
                 request=request,
                 success=True,
-                message=f'Dokumen "{document.get_display_name()}" berhasil diupload!',
+                message=f'Dokumen "{document.get_filename()}" berhasil diupload!',
                 redirect_url='archive:document_list'
             )
             
@@ -154,7 +154,7 @@ def document_update(request, pk):
             return AjaxHandler.handle_ajax_or_redirect(
                 request=request,
                 success=True,
-                message=f'Dokumen "{updated_document.get_display_name()}" berhasil diperbarui!',
+                message=f'Dokumen "{updated_document.get_filename()}" berhasil diperbarui!',
                 redirect_url='archive:document_list'
             )
             
@@ -228,7 +228,7 @@ def document_delete(request, pk):
         return AjaxHandler.handle_ajax_or_redirect(
             request=request,
             success=True,
-            message=f'Dokumen "{document.get_display_name()}" berhasil dihapus!',
+            message=f'Dokumen "{document.get_filename()}" berhasil dihapus!',
             redirect_url='archive:document_list'
         )
         

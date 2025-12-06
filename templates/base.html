@@ -74,20 +74,14 @@
         <!-- Page content -->
         <div class="container-fluid mt--6">
             
-            <!-- Messages -->
-            <div id="django-messages-container" style="display: none;">
-                {% if messages %}
+            <!-- NEW -->
+            {% if messages %}
+                <div id="django-messages-data" style="display: none;">
                     {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert" data-type="{{ message.tags }}" data-message="{{ message }}">
-                        <span class="alert-icon"><i class="fa-solid fa-circle-info"></i></span>
-                        <span class="alert-text">{{ message }}</span>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
+                    <div data-type="{{ message.tags }}" data-message="{{ message }}"></div>
                     {% endfor %}
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
             
             <div class="page-content">
                 <!-- Main Content -->
@@ -139,72 +133,15 @@
     <!-- Bootstrap Notify -->
     <script src="{% static 'vendor/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
     
+    <!-- Utils Module (FIRST - provides shared utilities) -->
+    <script src="{% static 'js/modules/utils.js' %}"></script>
+    
     <!-- Custom JS -->
     <script src="{% static 'js/custom.js' %}"></script>
     
     <!-- Handler JS -->
     <script src="{% static 'js/modal_handler.js' %}"></script>
     <script src="{% static 'js/panel_handler.js' %}"></script>
-
-    <script>
-        // CSRF token untuk AJAX - IMPROVED
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        
-        // Get CSRF token
-        const csrftoken = getCookie('csrftoken');
-        console.log('CSRF Token loaded:', csrftoken ? 'OK' : 'FAILED');
-        
-        // Setup AJAX dengan CSRF token
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Ambil token dari cookie atau input hidden
-                    const token = csrftoken || $('[name=csrfmiddlewaretoken]').val();
-                    if (token) {
-                        xhr.setRequestHeader("X-CSRFToken", token);
-                    }
-                }
-            }
-        });
-        
-        // Auto-hide alerts
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
-        
-        // Menampilkan notifikasi menggunakan Bootstrap Notify
-        function showNotification(type, message, title) {
-            $.notify({
-                icon: 'fa-solid fa-bell',
-                title: title || '',
-                message: message
-            }, {
-                type: type, // success, info, warning, danger
-                placement: {
-                    from: 'top',
-                    align: 'right'
-                },
-                delay: 4000,
-                animate: {
-                    enter: 'animate__animated animate__fadeInDown',
-                    exit: 'animate__animated animate__fadeOutUp'
-                }
-            });
-        }
-    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
